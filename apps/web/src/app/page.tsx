@@ -4,45 +4,52 @@ import { ArrowRight, Coins } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import { Grain, Logo, ScrollRail, Wash } from "@/components/landing/Atmosphere";
+import { ParticleField } from "@/components/landing/ParticleField";
+import { PhotoBackdrop, type Chapter } from "@/components/landing/PhotoBackdrop";
+
 /**
  * The landing page: a scroll-driven data story.
  *
- * The scroll does not move decoration around — it animates the product's own
- * real figures, taken from the seeded dataset. 10,000 transactions, ₹2.28
- * crore of spend across 14 months, 362,629 coins. Motion that carries data
- * beats motion that decorates (SpaceX note).
+ * The hero visual is not a stock photograph or a gradient blob — it is
+ * 10,000 canvas particles, one per transaction in the sample dataset, each
+ * carrying its real category colour. Scrolling reorganises them: scattered
+ * field, then a stream, then sorted into ten bands whose thickness is each
+ * category's genuine share of spend, then collapsed into a coin.
+ *
+ * Motion that carries data beats motion that decorates (SpaceX note). The
+ * artwork here IS the dataset, which is also why it cannot look like anyone
+ * else's landing page.
  *
  * Mechanism: one pinned stage, one scroll listener, one rAF. Progress through
- * the pinned region drives every chapter, so nothing can drift out of sync the
- * way parallel timers do. Under prefers-reduced-motion the whole thing settles
- * to its final state and stops listening.
- *
- * Design rules held here (docs/UI_SPEC.md):
- *  - nothing is in a box except ONE element — the coin readout
- *  - two type sizes in the hero and no third
- *  - nav is plain text, no pills, no underline
- *  - monochrome plus a single accent
+ * the pinned region drives both the copy and the canvas from a single value,
+ * so they cannot drift apart the way parallel timers do.
  */
 
 const TOTAL_TX = 10_000;
 const TOTAL_COINS = 362_629;
 const MONTHS = 14;
 
-/** The real category split from the seeded data, largest first. */
-const CATEGORIES: { label: string; share: number; hue: number }[] = [
-  { label: "Travel", share: 1.0, hue: 196 },
-  { label: "Shopping", share: 0.94, hue: 292 },
-  { label: "Education", share: 0.86, hue: 266 },
-  { label: "Utilities", share: 0.72, hue: 48 },
-  { label: "Insurance", share: 0.63, hue: 232 },
-  { label: "Health", share: 0.58, hue: 158 },
-  { label: "Groceries", share: 0.5, hue: 95 },
-  { label: "Entertainment", share: 0.44, hue: 330 },
-  { label: "Food & Dining", share: 0.38, hue: 12 },
-  { label: "Fuel", share: 0.33, hue: 32 },
+const LEGEND: { label: string; hue: number }[] = [
+  { label: "Travel", hue: 196 },
+  { label: "Shopping", hue: 292 },
+  { label: "Utilities", hue: 48 },
+  { label: "Food & Dining", hue: 12 },
+  { label: "Health", hue: 158 },
+  { label: "Education", hue: 266 },
+  { label: "Entertainment", hue: 330 },
+  { label: "Groceries", hue: 95 },
+  { label: "Fuel", hue: 32 },
+  { label: "Insurance", hue: 232 },
 ];
 
-/** Maps a global progress value into a 0..1 range for one chapter. */
+const BACKDROPS: Chapter[] = [
+  { src: "/img/coin-hero.jpg", alt: "", at: 0.0, position: "60% 45%" },
+  { src: "/img/card-tap.jpg", alt: "", at: 0.26, position: "center" },
+  { src: "/img/market-night.jpg", alt: "", at: 0.52, position: "center" },
+  { src: "/img/coin-stack.jpg", alt: "", at: 0.8, position: "center" },
+];
+
 function chapter(progress: number, start: number, end: number): number {
   return Math.max(0, Math.min(1, (progress - start) / (end - start)));
 }
@@ -92,21 +99,29 @@ export default function LandingPage() {
 
   const p = reduced ? 1 : progress;
 
-  const heroOut = chapter(p, 0, 0.18);
-  const rowsIn = chapter(p, 0.14, 0.36);
-  const barsIn = chapter(p, 0.38, 0.62);
-  const coinsIn = chapter(p, 0.64, 0.88);
+  const heroOut = chapter(p, 0, 0.16);
+  const rowsIn = chapter(p, 0.14, 0.34);
+  const barsIn = chapter(p, 0.38, 0.6);
+  const coinsIn = chapter(p, 0.64, 0.86);
 
   const txCount = Math.round(easeOut(rowsIn) * TOTAL_TX);
   const coinCount = Math.round(easeOut(coinsIn) * TOTAL_COINS);
 
+  const chapterClass = reduced
+    ? "relative"
+    : "absolute inset-0 flex flex-col justify-center";
+
   return (
-    <div className="min-h-dvh bg-bg">
-      {/* Nav: plain text, no pills, no active underline (SpaceX). */}
+    <div className="relative min-h-dvh bg-bg">
+      <Grain />
+      {!reduced && <ScrollRail progress={p} />}
+
+      {/* Nav: plain text with the mark. No pills, no active underline. */}
       <header className="fixed inset-x-0 top-0 z-30">
         <nav className="mx-auto flex max-w-[1200px] items-center gap-6 px-5 py-5 sm:px-8">
-          <span className="mr-auto text-[13px] font-medium uppercase tracking-[0.16em] text-text">
-            Coinfold
+          <span className="mr-auto inline-flex items-center gap-2.5 text-text">
+            <Logo size={20} />
+            <span className="text-[13px] font-medium uppercase tracking-[0.16em]">Coinfold</span>
           </span>
           <Link
             href="/login"
@@ -124,24 +139,34 @@ export default function LandingPage() {
       </header>
 
       {/* ---- The pinned stage ------------------------------------------- */}
-      <div ref={stageRef} style={{ height: reduced ? "auto" : "460vh" }}>
+      <div ref={stageRef} style={{ height: reduced ? "auto" : "500vh" }}>
         <div
           className={
             reduced
-              ? "space-y-24 px-5 py-28 sm:px-8"
-              : "sticky top-0 flex h-dvh items-center overflow-hidden px-5 sm:px-8"
+              ? "relative space-y-28 px-5 py-28 sm:px-8"
+              : "sticky top-0 h-dvh overflow-hidden px-5 sm:px-8"
           }
         >
-          <div className="relative mx-auto w-full max-w-[1200px]">
-            {/* Chapter 1 — the claim. Two type sizes, nothing boxed. */}
+          {/* Photography carries the atmosphere. */}
+          <PhotoBackdrop chapters={BACKDROPS} progress={p} reduced={reduced} />
+          <Wash />
+          {/* The dataset, laid over the photograph as texture: it still
+              performs the sort-into-categories moment, but it no longer has
+              to carry the whole composition on its own. */}
+          <div className="absolute inset-0 opacity-70 mix-blend-screen">
+            <ParticleField progress={p} reduced={reduced} />
+          </div>
+
+          <div className="relative mx-auto h-full w-full max-w-[1200px]">
+            {/* Chapter 1 — the claim */}
             <section
-              className={reduced ? "" : "absolute inset-x-0 top-1/2 -translate-y-1/2"}
+              className={chapterClass}
               style={
                 reduced
                   ? undefined
                   : {
                       opacity: 1 - heroOut,
-                      transform: `translateY(calc(-50% - ${heroOut * 40}px))`,
+                      transform: `translateY(${heroOut * -40}px)`,
                       pointerEvents: heroOut > 0.9 ? "none" : undefined,
                     }
               }
@@ -156,13 +181,15 @@ export default function LandingPage() {
               </h1>
               <p className="mt-7 max-w-[46ch] text-[15px] leading-relaxed text-text-dim">
                 Every ₹100 you pay earns a coin. Every rupee you spend is sorted, searchable and
-                charted. Scroll to see it on {TOTAL_TX.toLocaleString("en-IN")} real transactions.
+                charted. Each speck behind this text is one of{" "}
+                {TOTAL_TX.toLocaleString("en-IN")} real transactions — keep scrolling and they
+                sort themselves.
               </p>
             </section>
 
-            {/* Chapter 2 — the volume. Rows assemble as the number counts. */}
+            {/* Chapter 2 — the volume */}
             <section
-              className={reduced ? "" : "absolute inset-x-0 top-1/2 -translate-y-1/2"}
+              className={chapterClass}
               style={
                 reduced
                   ? undefined
@@ -179,36 +206,15 @@ export default function LandingPage() {
                 {txCount.toLocaleString("en-IN")}
               </p>
               <p className="mt-4 max-w-[46ch] text-[15px] leading-relaxed text-text-dim">
-                transactions across {MONTHS} months, filtered and sorted in Postgres — never shipped
-                to your browser in one lump.
+                transactions across {MONTHS} months, filtered and sorted in Postgres — never
+                shipped to your browser in one lump.
               </p>
-
-              {/* Rows assembling, one after another. */}
-              <ul className="mt-9 max-w-[540px] space-y-0">
-                {["Domino's", "BPCL", "MakeMyTrip", "Croma", "1mg"].map((merchant, index) => {
-                  const local = Math.max(0, Math.min(1, rowsIn * 5 - index * 0.55));
-                  return (
-                    <li
-                      key={merchant}
-                      className="flex items-center justify-between border-b border-border py-2.5"
-                      style={{
-                        opacity: local,
-                        transform: `translateY(${(1 - local) * 10}px)`,
-                      }}
-                    >
-                      <span className="text-[13px] text-text-dim">{merchant}</span>
-                      <span className="tnum text-[13px] text-text-faint">
-                        ₹{(689 + index * 431).toLocaleString("en-IN")}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
             </section>
 
-            {/* Chapter 3 — where it went. Bars grow to their real share. */}
+            {/* Chapter 3 — the sort. The canvas does the drawing; the copy
+                only names what the reader is already watching happen. */}
             <section
-              className={reduced ? "" : "absolute inset-x-0 top-1/2 -translate-y-1/2"}
+              className={chapterClass}
               style={
                 reduced
                   ? undefined
@@ -218,52 +224,65 @@ export default function LandingPage() {
                     }
               }
             >
-              <p className="text-[12px] uppercase tracking-[0.22em] text-text-faint">
-                Where the money actually went
-              </p>
-              <h2 className="mt-4 text-[clamp(2rem,6vw,3.6rem)] font-semibold uppercase leading-[0.95] tracking-[-0.03em] text-text">
-                Ten categories.
-                <br />
-                One glance.
-              </h2>
-
-              <ul className="mt-8 max-w-[620px] space-y-2.5">
-                {CATEGORIES.map((category, index) => {
-                  const local = Math.max(0, Math.min(1, barsIn * 3 - index * 0.16));
-                  return (
-                    <li key={category.label} className="flex items-center gap-4">
-                      <span className="w-[104px] shrink-0 text-right text-[12px] text-text-faint">
-                        {category.label}
-                      </span>
-                      <span className="h-[7px] flex-1 overflow-hidden rounded-full bg-surface-2">
-                        <span
-                          className="block h-full rounded-full"
-                          style={{
-                            width: `${easeOut(local) * category.share * 100}%`,
-                            background: `oklch(72% 0.13 ${category.hue})`,
-                          }}
-                        />
-                      </span>
+              <div className="relative ml-auto max-w-[30ch] text-right">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-x-10 -inset-y-8"
+                  style={{
+                    background:
+                      "radial-gradient(ellipse 70% 60% at 70% 50%, var(--bg) 45%, transparent 100%)",
+                  }}
+                />
+                <div className="relative">
+                <p className="text-[12px] uppercase tracking-[0.22em] text-text-faint">
+                  Where the money actually went
+                </p>
+                <h2 className="mt-4 text-[clamp(1.8rem,5vw,3.2rem)] font-semibold uppercase leading-[0.98] tracking-[-0.03em] text-text">
+                  Ten categories,
+                  <br />
+                  sorting themselves
+                </h2>
+                <ul className="mt-6 flex flex-wrap justify-end gap-x-4 gap-y-1.5">
+                  {LEGEND.map((item) => (
+                    <li
+                      key={item.label}
+                      className="inline-flex items-center gap-1.5 text-[11px] text-text-dim"
+                    >
+                      <span
+                        aria-hidden
+                        className="size-1.5 rounded-full"
+                        style={{ background: `oklch(72% 0.13 ${item.hue})` }}
+                      />
+                      {item.label}
                     </li>
-                  );
-                })}
-              </ul>
+                  ))}
+                </ul>
+                </div>
+              </div>
             </section>
 
             {/* Chapter 4 — the payoff. THE one framed element in the design. */}
             <section
               className={
-                reduced ? "" : "absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center"
+                reduced ? "relative" : "absolute inset-0 flex flex-col items-center justify-center"
               }
               style={reduced ? undefined : { opacity: coinsIn, pointerEvents: "none" }}
             >
-              <div className="text-center">
-                <p className="text-[12px] uppercase tracking-[0.22em] text-text-faint">
+              <div className="relative text-center">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-x-16 -inset-y-10"
+                  style={{
+                    background:
+                      "radial-gradient(ellipse 60% 55% at 50% 62%, var(--bg) 40%, transparent 100%)",
+                  }}
+                />
+                <p className="relative text-[12px] uppercase tracking-[0.22em] text-text-faint">
                   And the change you kept
                 </p>
 
                 <div
-                  className="mx-auto mt-6 inline-flex items-center gap-4 rounded-[var(--r-card)] border border-border-strong bg-surface-1 px-7 py-5 shadow-[var(--shadow-2),var(--highlight)]"
+                  className="relative mx-auto mt-6 inline-flex items-center gap-4 rounded-[var(--r-card)] border border-border-strong bg-surface-1/80 px-7 py-5 shadow-[var(--shadow-2),var(--highlight)] backdrop-blur-md"
                   style={{ transform: `scale(${0.96 + easeOut(coinsIn) * 0.04})` }}
                 >
                   <Coins size={26} aria-hidden style={{ color: "var(--accent)" }} />
@@ -277,9 +296,9 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <p className="mx-auto mt-6 max-w-[42ch] text-[15px] leading-relaxed text-text-dim">
-                  Redeemable against vouchers and statement cashback. The balance is a ledger, not a
-                  counter — every coin can be traced to the payment that earned it.
+                <p className="relative mx-auto mt-6 max-w-[42ch] text-[15px] leading-relaxed text-text-dim">
+                  Redeemable against vouchers and statement cashback. The balance is a ledger, not
+                  a counter — every coin traces back to the payment that earned it.
                 </p>
               </div>
             </section>
@@ -288,7 +307,7 @@ export default function LandingPage() {
       </div>
 
       {/* ---- Below the story: a real page ------------------------------- */}
-      <section className="border-t border-border px-5 py-24 sm:px-8">
+      <section className="relative border-t border-border px-5 py-24 sm:px-8">
         <div className="mx-auto max-w-[1200px]">
           <h2 className="max-w-[18ch] text-[clamp(1.8rem,5vw,3rem)] font-semibold uppercase leading-[0.98] tracking-[-0.03em] text-text">
             Built for the messy data, not the demo data
@@ -302,7 +321,7 @@ export default function LandingPage() {
               },
               {
                 title: "Nothing is silently dropped",
-                body: "40 duplicate ids, 200 missing categories, 148 refunds and one 999999999 sentinel. Each is kept, flagged, and explained in the row's detail panel.",
+                body: "40 duplicate ids, 200 missing categories, 148 refunds and one 999999999 sentinel. Each is kept, flagged, and explained in the row's own detail panel.",
               },
               {
                 title: "Coins are a ledger",
@@ -347,10 +366,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="border-t border-border px-5 py-8 sm:px-8">
+      <footer className="relative border-t border-border px-5 py-8 sm:px-8">
         <p className="mx-auto max-w-[1200px] text-[12px] text-text-faint">
-          Coinfold — built as a take-home exercise. Figures come from the supplied 10,000-row sample
-          dataset.
+          Coinfold — built as a take-home exercise. Every figure comes from the supplied
+          10,000-row sample dataset.
         </p>
       </footer>
     </div>

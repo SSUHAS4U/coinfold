@@ -45,20 +45,25 @@ DEFAULT_FEED = REPO_ROOT / "db" / "seed" / "transactions.raw.json"
 
 # --- Reference data ---------------------------------------------------------
 
-# Hues are spaced around the wheel so no two categories read as the same colour
-# in a pie chart, and each keeps its hue everywhere in the UI. The fallback is
-# rendered desaturated so "no category" never looks like a real category.
+# Hues are assigned by SHARE OF SPEND, not alphabetically, so the largest
+# slices land furthest apart on the colour wheel. Assigning them in category
+# order produced a donut where the top four (Education 38%, Insurance 18%,
+# Shopping 16%, Travel 9%) all fell in the blue-violet range and the chart read
+# as one mass.
+#
+# The band 150-185 is deliberately left empty: that is where --accent lives, and
+# the accent is brand/CTA only, never a data colour.
 CATEGORIES: list[tuple[str, str, int, bool]] = [
-    ("food-dining", "Food & Dining", 12, False),
-    ("fuel", "Fuel", 32, False),
-    ("utilities", "Utilities", 48, False),
-    ("groceries", "Groceries", 95, False),
-    ("health", "Health", 158, False),
-    ("travel", "Travel", 196, False),
-    ("insurance", "Insurance", 232, False),
-    ("education", "Education", 266, False),
-    ("shopping", "Shopping", 292, False),
-    ("entertainment", "Entertainment", 330, False),
+    ("education", "Education", 25, False),      # largest share
+    ("insurance", "Insurance", 265, False),
+    ("shopping", "Shopping", 330, False),
+    ("travel", "Travel", 205, False),
+    ("health", "Health", 105, False),
+    ("groceries", "Groceries", 62, False),
+    ("fuel", "Fuel", 8, False),
+    ("utilities", "Utilities", 235, False),
+    ("food-dining", "Food & Dining", 350, False),
+    ("entertainment", "Entertainment", 292, False),
     ("uncategorised", "Uncategorised", 220, True),
 ]
 

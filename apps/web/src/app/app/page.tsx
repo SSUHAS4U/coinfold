@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { CategoryDonut, MonthlyTrend } from "@/components/charts/SpendCharts";
+import { Logo } from "@/components/landing/Atmosphere";
+import { StillBackdrop } from "@/components/landing/PhotoBackdrop";
 import { CoinHud } from "@/components/dashboard/CoinHud";
 import { FilterBar } from "@/components/dashboard/FilterBar";
 import { Pagination } from "@/components/dashboard/Pagination";
@@ -73,7 +75,13 @@ function StatRow({
 }) {
   const stats: { label: string; value: string; tone?: string }[] = [
     { label: "Total spent", value: money(spend) },
-    { label: "Refunded", value: moneyCompact(refunded), tone: "var(--success)" },
+    // The label already carries the direction, so the figure is shown as a
+    // magnitude. "Refunded -₹10.3L" reads as money lost, which is backwards.
+    {
+      label: "Refunded",
+      value: moneyCompact(Math.abs(Number(refunded) || 0)),
+      tone: "var(--success)",
+    },
     { label: "Transactions", value: count(matched) },
     { label: "Failed", value: count(failed), tone: failed > 0 ? "var(--danger)" : undefined },
     { label: "Pending", value: count(pending), tone: pending > 0 ? "var(--warning)" : undefined },
@@ -185,8 +193,9 @@ export default function DashboardPage() {
     <div className="min-h-dvh">
       <header className="sticky top-0 z-20 border-b border-border bg-bg/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
-          <a href="/" className="mr-auto text-[15px] font-semibold tracking-[-0.01em] text-text">
-            coinfold
+          <a href="/" className="mr-auto inline-flex items-center gap-2.5 text-text">
+            <Logo size={19} />
+            <span className="text-[13px] font-medium uppercase tracking-[0.16em]">Coinfold</span>
           </a>
 
           <CoinHud
@@ -209,8 +218,23 @@ export default function DashboardPage() {
       </header>
 
       <main className="mx-auto max-w-[1400px] space-y-8 px-4 py-8 sm:px-6">
-        {/* Conclusion first */}
-        <section aria-label="Summary">
+        {/* Conclusion first, on a photographic band. The image is heavily
+            scrimmed: it supplies depth and a sense of place, and must never
+            compete with the figures sitting on it. */}
+        <section
+          aria-label="Summary"
+          className="relative overflow-hidden rounded-[var(--r-card)] border border-border p-6 sm:p-8"
+        >
+          <StillBackdrop src="/img/card-desk.jpg" alt="" position="center" overlay={0.72} />
+          <div className="relative">
+            <p className="text-[12px] uppercase tracking-[0.18em] text-text-faint">
+              This statement
+            </p>
+            <h1 className="mt-2 text-[clamp(1.5rem,3vw,2.2rem)] font-semibold tracking-[-0.02em] text-text">
+              Where your money went
+            </h1>
+          </div>
+          <div className="relative mt-7">
           <StatRow
             spend={summary.data?.total_spend ?? "0"}
             refunded={summary.data?.total_refunded ?? "0"}
@@ -220,6 +244,7 @@ export default function DashboardPage() {
             coins={summary.data?.coins_earned ?? 0}
             loading={summary.loading && !summary.data}
           />
+          </div>
         </section>
 
         {/* Evidence */}

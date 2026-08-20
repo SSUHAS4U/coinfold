@@ -36,3 +36,6 @@ coverage/
 # --- Local runtime artefacts
 apps/api/logs/
 *.log
+
+# Playwright MCP scratch output
+.playwright-mcp/

@@ -4,6 +4,8 @@ import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState, type FormEvent } from "react";
 
+import { Logo } from "@/components/landing/Atmosphere";
+import { StillBackdrop } from "@/components/landing/PhotoBackdrop";
 import { Button } from "@/components/ui/Button";
 import { ApiError, api, tokens } from "@/lib/api";
 
@@ -54,11 +56,64 @@ export default function LoginPage() {
   );
 
   return (
-    <main className="grid min-h-dvh place-items-center px-4 py-10">
-      <div className="w-full max-w-[400px]">
-        <a href="/" className="text-[15px] font-semibold tracking-[-0.01em] text-text">
-          coinfold
-        </a>
+    <main className="grid min-h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)]">
+      {/*
+        The photographic half. Hidden below lg: on a phone it would push the
+        form below the fold, and a sign-in you have to scroll to is a worse
+        experience than no picture at all.
+      */}
+      <aside className="relative hidden overflow-hidden lg:block">
+        <StillBackdrop
+          src="/img/coin-macro.jpg"
+          alt=""
+          position="center"
+          overlay={0.58}
+        />
+        <div className="relative flex h-full flex-col justify-between p-12">
+          <a href="/" className="inline-flex items-center gap-2.5 text-text">
+            <Logo size={22} />
+            <span className="text-[13px] font-medium uppercase tracking-[0.16em]">Coinfold</span>
+          </a>
+
+          <div>
+            <h2 className="max-w-[14ch] text-[clamp(2rem,3.4vw,3.2rem)] font-semibold uppercase leading-[0.96] tracking-[-0.03em] text-text">
+              Pay the bill.
+              <br />
+              Keep the change.
+            </h2>
+            <p className="mt-5 max-w-[38ch] text-[14px] leading-relaxed text-text-dim">
+              10,000 transactions, 14 months, and every coin traceable to the payment that
+              earned it.
+            </p>
+
+            <dl className="mt-9 flex gap-10">
+              {[
+                ["10,000", "transactions"],
+                ["3,62,629", "coins earned"],
+                ["14", "months"],
+              ].map(([value, label]) => (
+                <div key={label}>
+                  <dt className="tnum text-[22px] font-semibold tracking-[-0.02em] text-text">
+                    {value}
+                  </dt>
+                  <dd className="mt-0.5 text-[12px] text-text-faint">{label}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+      </aside>
+
+      {/* The form half. */}
+      <div className="relative flex items-center justify-center px-5 py-12 sm:px-10">
+        <div className="w-full max-w-[400px]">
+          <a
+            href="/"
+            className="inline-flex items-center gap-2.5 text-text lg:hidden"
+          >
+            <Logo size={20} />
+            <span className="text-[13px] font-medium uppercase tracking-[0.16em]">Coinfold</span>
+          </a>
 
         <h1 className="mt-6 text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] text-text">
           {mode === "signin" ? "Welcome back." : "Create your account."}
@@ -161,8 +216,9 @@ export default function LoginPage() {
             <p className="mt-1.5 text-[12px] leading-relaxed text-text-faint">
               Already filled in above. It holds the full 10,000-row statement.
             </p>
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );

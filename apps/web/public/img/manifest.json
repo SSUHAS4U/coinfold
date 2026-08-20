@@ -1,0 +1,86 @@
+{
+  "coin-hero": {
+    "file": "/img/coin-hero.jpg",
+    "source": "https://images.pexels.com/photos/8358039/pexels-photo-8358039.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 244552
+  },
+  "coin-stack": {
+    "file": "/img/coin-stack.jpg",
+    "source": "https://images.pexels.com/photos/12198523/pexels-photo-12198523.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 100066
+  },
+  "coin-float": {
+    "file": "/img/coin-float.jpg",
+    "source": "https://images.pexels.com/photos/12198528/pexels-photo-12198528.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 50325
+  },
+  "coin-macro": {
+    "file": "/img/coin-macro.jpg",
+    "source": "https://images.pexels.com/photos/14856617/pexels-photo-14856617.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 240944
+  },
+  "crypto-dark": {
+    "file": "/img/crypto-dark.jpg",
+    "source": "https://images.pexels.com/photos/20534452/pexels-photo-20534452.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 106444
+  },
+  "card-tap": {
+    "file": "/img/card-tap.jpg",
+    "source": "https://images.pexels.com/photos/5239804/pexels-photo-5239804.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 145007
+  },
+  "card-hand": {
+    "file": "/img/card-hand.jpg",
+    "source": "https://images.pexels.com/photos/4968635/pexels-photo-4968635.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 83069
+  },
+  "card-desk": {
+    "file": "/img/card-desk.jpg",
+    "source": "https://images.pexels.com/photos/50987/money-card-business-credit-card-50987.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 74861
+  },
+  "market-night": {
+    "file": "/img/market-night.jpg",
+    "source": "https://images.pexels.com/photos/16005658/pexels-photo-16005658.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 301807
+  },
+  "market-street": {
+    "file": "/img/market-street.jpg",
+    "source": "https://images.pexels.com/photos/16247340/pexels-photo-16247340.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 396334
+  },
+  "texture-dark": {
+    "file": "/img/texture-dark.jpg",
+    "source": "https://images.pexels.com/photos/6485524/pexels-photo-6485524.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 274300
+  },
+  "texture-flow": {
+    "file": "/img/texture-flow.jpg",
+    "source": "https://images.pexels.com/photos/7505924/pexels-photo-7505924.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 165170
+  }
+}
