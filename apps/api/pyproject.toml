@@ -1,0 +1,64 @@
+[project]
+name = "coinfold-api"
+version = "1.0.0"
+description = "Coinfold API — transactions, spend analytics, and reward coins."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "psycopg[binary,pool]>=3.2",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "argon2-cffi>=23.1",
+    "pyjwt>=2.9",
+    "python-multipart>=0.0.12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.27",
+    "ruff>=0.7",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["coinfold*"]
+
+# ---------------------------------------------------------------------------
+# Lint. Deliberately narrow and bug-driven: a linter that reports 400 style
+# complaints gets ignored, and then it catches nothing on the day it matters.
+# The rules here are the ones that catch real defects, chiefly F821
+# (undefined name) and F811 (redefinition), the Python equivalents of the
+# no-undef / no-use-before-define pair. `npm test` runs lint first so this
+# cannot be skipped.
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "F",    # pyflakes: undefined names, unused imports, f-string bugs
+    "E9",   # syntax and IO errors
+    "B",    # bugbear: mutable defaults, and the rest of the real-bug set
+    "S",    # bandit: hardcoded secrets, SQL injection, weak crypto
+    "ASYNC",# blocking calls inside async def
+    "DTZ",  # naive datetimes — the single most likely bug class in this app
+    "T20",  # stray print() left in shipped code
+]
+ignore = [
+    "S101",  # assert is how pytest works
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S105", "S106"]  # test fixtures may hold obvious dummy passwords
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q --strict-markers"
