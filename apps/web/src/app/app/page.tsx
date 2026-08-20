@@ -64,6 +64,7 @@ function StatRow({
   pending,
   coins,
   loading,
+  onDark,
 }: {
   spend: string;
   refunded: string;
@@ -72,7 +73,15 @@ function StatRow({
   pending: number;
   coins: number;
   loading: boolean;
+  /**
+   * True when this sits on the photographic band. That surface is dark in both
+   * themes, so its ink is pinned light rather than following --text, which
+   * flips to near-black in light mode and vanishes against the scrim.
+   */
+  onDark?: boolean;
 }) {
+  const ink = onDark ? "#F2F4F7" : "var(--text)";
+  const inkDim = onDark ? "rgb(242 244 247 / 0.66)" : "var(--text-faint)";
   // The full figure (₹6,20,42,662.87) does not fit a 360px column and was
   // truncating to "₹6,20,42,66…", which is worse than useless — a partial
   // number reads as a real one. Narrow viewports get the compact form
@@ -87,9 +96,17 @@ function StatRow({
       tone: "var(--success)",
     },
     { label: "Transactions", value: count(matched) },
-    { label: "Failed", value: count(failed), tone: failed > 0 ? "var(--danger)" : undefined },
-    { label: "Pending", value: count(pending), tone: pending > 0 ? "var(--warning)" : undefined },
-    { label: "Coins earned", value: count(coins), tone: "var(--accent)" },
+    {
+      label: "Failed",
+      value: count(failed),
+      tone: failed > 0 ? (onDark ? "#F0654E" : "var(--danger)") : undefined,
+    },
+    {
+      label: "Pending",
+      value: count(pending),
+      tone: pending > 0 ? (onDark ? "#F5B544" : "var(--warning)") : undefined,
+    },
+    { label: "Coins earned", value: count(coins), tone: onDark ? "#5BE9B9" : "var(--accent)" },
   ];
 
   return (
@@ -97,16 +114,19 @@ function StatRow({
       {stats.map((stat, index) => (
         <div
           key={stat.label}
-          className={index > 0 ? "lg:border-l lg:border-border lg:pl-6" : undefined}
+          className={index > 0 ? "lg:border-l lg:pl-6" : undefined}
+          style={index > 0 ? { borderColor: onDark ? "rgb(242 244 247 / 0.16)" : "var(--border)" } : undefined}
         >
-          <dt className="text-[12px] tracking-[0.02em] text-text-faint">{stat.label}</dt>
+          <dt className="text-[12px] tracking-[0.02em]" style={{ color: inkDim }}>
+            {stat.label}
+          </dt>
           <dd>
             {loading ? (
               <Skeleton className="mt-1.5 h-7 w-24" />
             ) : (
               <span
                 className="tnum mt-1 block truncate text-[22px] font-semibold tracking-[-0.02em]"
-                style={{ color: stat.tone ?? "var(--text)" }}
+                style={{ color: stat.tone ?? ink }}
                 title={stat.value}
               >
                 {stat.compact ? (
@@ -239,10 +259,16 @@ export default function DashboardPage() {
         >
           <StillBackdrop src="/img/card-desk.jpg" alt="" position="center" overlay={0.72} />
           <div className="relative">
-            <p className="text-[12px] uppercase tracking-[0.18em] text-text-faint">
+            <p
+              className="text-[12px] uppercase tracking-[0.18em]"
+              style={{ color: "rgb(242 244 247 / 0.66)" }}
+            >
               This statement
             </p>
-            <h1 className="mt-2 text-[clamp(1.5rem,3vw,2.2rem)] font-semibold tracking-[-0.02em] text-text">
+            <h1
+              className="mt-2 text-[clamp(1.5rem,3vw,2.2rem)] font-semibold tracking-[-0.02em]"
+              style={{ color: "#F2F4F7" }}
+            >
               Where your money went
             </h1>
           </div>
@@ -255,6 +281,7 @@ export default function DashboardPage() {
             pending={summary.data?.pending ?? 0}
             coins={summary.data?.coins_earned ?? 0}
             loading={summary.loading && !summary.data}
+            onDark
           />
           </div>
         </section>

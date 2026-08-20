@@ -156,9 +156,18 @@ with httpx.Client(base_url=BASE, timeout=60.0) as c:
 
     print("\n-- rewards --")
     r = c.get("/api/rewards/balance", headers=auth)
-    bal = r.json()["balance"]
+    body = r.json()
+    bal = body["balance"]
     check("balance 200", r.status_code == 200, r.text[:200])
-    check("balance is seeded 362629", bal == 362629, bal)
+    # lifetime_earned is the durable figure: it is fixed by the seed and never
+    # decreases. Asserting the *balance* equals 362629 would fail the moment
+    # anything redeems, which makes the suite un-rerunnable without a re-seed.
+    check("lifetime earned is the seeded 362629", body["lifetime_earned"] == 362629,
+          body.get("lifetime_earned"))
+    check("balance never exceeds lifetime earned", bal <= body["lifetime_earned"], bal)
+    check("balance and ledger agree",
+          bal == body["lifetime_earned"] - body["lifetime_spent"],
+          (bal, body.get("lifetime_earned"), body.get("lifetime_spent")))
 
     r = c.get("/api/rewards/catalogue", headers=auth)
     cat = r.json()
@@ -214,7 +223,7 @@ with httpx.Client(base_url=BASE, timeout=60.0) as c:
 
     r = c.get("/api/rewards/balance", headers=poor_auth)
     fresh_balance = r.json()["balance"]
-    check("new account got its own seeded ledger", fresh_balance == 362629, fresh_balance)
+    check("new account got its own seeded ledger", fresh_balance == 362629, fresh_balance)  # untouched account, so balance == earned
 
     # Drain the balance to test the insufficient path deterministically.
     biggest = max(cat, key=lambda x: x["coin_cost"])
