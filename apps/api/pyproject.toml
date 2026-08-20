@@ -56,7 +56,12 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S105", "S106"]  # test fixtures may hold obvious dummy passwords
+# Test fixtures may hold obvious dummy passwords.
+"tests/*" = ["S105", "S106"]
+# seed.py is a command-line script; printing its ingest report is the job.
+"coinfold/ingest/seed.py" = ["T201"]
+# `token_type: Literal["bearer"]` is an OAuth response field, not a credential.
+"coinfold/api/schemas.py" = ["S105"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
