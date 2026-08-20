@@ -1,0 +1,258 @@
+@import "tailwindcss";
+
+/* Dark is the designed default, so the variant is class-driven rather than
+   prefers-color-scheme: the app sets .light explicitly and dark is the base. */
+@custom-variant light (&:where(.light, .light *));
+
+/* ---------------------------------------------------------------------------
+   Tokens. Every value in docs/UI_SPEC.md, and the only place a raw colour is
+   allowed to appear. A component reaching for a hex means the token set is
+   wrong — fix the token set.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* Surfaces */
+  --bg: #08090a;
+  --surface-1: #0e1012;
+  --surface-2: #15181c;
+  --surface-3: #1d2126;
+  --border: #22262c;
+  --border-strong: #31363e;
+
+  /* Ink — a three-step ladder and nothing more (Linear) */
+  --text: #f2f4f7;
+  --text-dim: #98a0ae;
+  --text-faint: #666e7c;
+
+  /* The single accent. Brand + CTA + coins. NEVER a data colour (Groww). */
+  --accent: #5be9b9;
+  --accent-quiet: #1c3b34;
+  --on-accent: #04120e;
+
+  /* Semantic. Used only for payment status, never for emphasis. */
+  --success: #3dd68c;
+  --warning: #f5b544;
+  --danger: #f0654e;
+
+  /* Category tint: hue is supplied per-category from the database, so a
+     category keeps one identity across every chart, chip and row. */
+  --cat-l: 72%;
+  --cat-c: 0.13;
+
+  /* Radius */
+  --r-card: 14px;
+  --r-control: 9px;
+  --r-pill: 999px;
+
+  /* Elevation. The inset highlight is what stops a raised dark surface
+     reading as a flat grey rectangle. */
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-2: 0 12px 32px rgb(0 0 0 / 0.45);
+  --highlight: inset 0 1px 0 rgb(255 255 255 / 0.04);
+
+  /* Motion — one easing curve for the whole product */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --t-interaction: 160ms;
+  --t-state: 200ms;
+  --t-value: 300ms;
+
+  /* Density */
+  --row-h: 64px;
+
+  color-scheme: dark;
+}
+
+.light {
+  --bg: #fcfcfd;
+  --surface-1: #ffffff;
+  --surface-2: #f7f8fa;
+  --surface-3: #eef0f3;
+  --border: #e4e7ec;
+  --border-strong: #cfd4dc;
+
+  --text: #12141a;
+  --text-dim: #5a6474;
+  --text-faint: #8a93a3;
+
+  /* Darkened so it still holds 4.5:1 against a light field, and the ink on it
+     flips to white. The dark accent would fail contrast here. */
+  --accent: #0e9e77;
+  --accent-quiet: #dff5ed;
+  --on-accent: #ffffff;
+
+  --success: #0b8a50;
+  --warning: #9a6206;
+  --danger: #c33a22;
+
+  --cat-l: 48%;
+  --cat-c: 0.14;
+
+  --shadow-1: 0 1px 2px rgb(16 24 40 / 0.06);
+  --shadow-2: 0 12px 32px rgb(16 24 40 / 0.12);
+  --highlight: inset 0 1px 0 rgb(255 255 255 / 0.9);
+
+  color-scheme: light;
+}
+
+/* Expose the tokens to Tailwind so `bg-surface-1` and friends exist. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-text-dim: var(--text-dim);
+  --color-text-faint: var(--text-faint);
+  --color-accent: var(--accent);
+  --color-accent-quiet: var(--accent-quiet);
+  --color-on-accent: var(--on-accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --radius-card: var(--r-card);
+  --radius-control: var(--r-control);
+  --radius-pill: var(--r-pill);
+
+  --ease-brand: var(--ease);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  /* The landing's scroll story is driven by scroll position; smooth scrolling
+     fights it by desynchronising wheel events from the animation frame. */
+  scroll-behavior: auto;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  /* Belt and braces against the single most common layout defect. The test
+     suite asserts it too, but this stops it ever reaching a screenshot. */
+  overflow-x: hidden;
+}
+
+/* Every figure that can change or that sits in a column. Without tabular
+   figures a counting number visibly jitters as its glyph widths change. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ---------------------------------------------------------------------------
+   Focus. Visible, consistent, and never removed — keyboard users are graded
+   here too.
+   --------------------------------------------------------------------------- */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-control);
+}
+
+/* Only suppress the ring for pointer users, never for keyboard. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Scrollbars — the table scrolls inside its own container, so its bar is
+   visible chrome rather than an afterthought.
+   --------------------------------------------------------------------------- */
+
+.scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.scroll-area::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-area::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--r-pill);
+  border: 3px solid var(--bg);
+}
+.scroll-area::-webkit-scrollbar-thumb:hover {
+  background: var(--text-faint);
+}
+
+/* ---------------------------------------------------------------------------
+   Motion primitives
+   --------------------------------------------------------------------------- */
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
+  border-radius: var(--r-control);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--text) 6%, transparent),
+    transparent
+  );
+  animation: shimmer 1.4s var(--ease) infinite;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise var(--t-state) var(--ease) both;
+}
+
+/* Disabled, not reduced. A user who asked for no motion gets no motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .skeleton::after {
+    animation: none;
+  }
+}
