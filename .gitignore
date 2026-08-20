@@ -1,0 +1,38 @@
+# --- Secrets: never committed. See docs/DEPLOY.md for how values reach the hosts.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+.turbo/
+*.tsbuildinfo
+.vercel/
+
+# --- Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+
+# --- Tooling / OS
+.DS_Store
+Thumbs.db
+desktop.ini
+playwright-report/
+test-results/
+coverage/
+
+# --- Local runtime artefacts
+apps/api/logs/
+*.log
