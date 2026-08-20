@@ -36,8 +36,10 @@ const VARIANTS: Record<Variant, string> = {
 };
 
 const SIZES: Record<Size, string> = {
-  // min-h-11 is 44px — the touch-target floor asserted by the render tests.
-  sm: "h-9 min-h-9 px-3 text-[13px] gap-1.5 rounded-[var(--r-control)]",
+  // min-h-11 is 44px, the touch-target floor the render tests assert. The sm
+  // size drops to 36px only from the sm breakpoint up: fingers get the floor,
+  // desktop density does not pay for it.
+  sm: "h-11 min-h-11 sm:h-9 sm:min-h-9 px-3 text-[13px] gap-1.5 rounded-[var(--r-control)]",
   md: "h-11 min-h-11 px-4 text-sm gap-2 rounded-[var(--r-control)]",
   lg: "h-12 min-h-12 px-6 text-[15px] gap-2 rounded-[var(--r-control)]",
 };

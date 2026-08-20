@@ -83,7 +83,7 @@ export function Chip({
   return (
     <span
       className={[
-        "group inline-flex h-9 min-h-9 items-center gap-2 rounded-[var(--r-pill)] border pl-3",
+        "group inline-flex h-11 min-h-11 items-center gap-2 rounded-[var(--r-pill)] border pl-3 sm:h-9 sm:min-h-9",
         onRemove ? "pr-1.5" : "pr-3",
         "text-[13px] transition-colors duration-[var(--t-interaction)] ease-[var(--ease)]",
         active
@@ -91,10 +91,17 @@ export function Chip({
           : "border-border bg-surface-1 text-text-dim hover:border-border-strong hover:text-text",
       ].join(" ")}
     >
+      {/*
+        The height lives on the BUTTON, not only on the wrapper. With it on the
+        wrapper alone the chip looked 36px tall while the actual click target
+        was 20px — smaller than it appeared, and below the touch floor. The
+        render tests measure the interactive element, which is what a finger
+        hits.
+      */}
       <button
         type="button"
         onClick={onClick}
-        className="inline-flex items-center gap-2 outline-none"
+        className="inline-flex h-11 min-h-11 items-center gap-2 outline-none sm:h-9 sm:min-h-9"
         aria-pressed={onClick ? Boolean(active) : undefined}
       >
         {hue !== undefined && (

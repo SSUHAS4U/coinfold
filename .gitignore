@@ -39,3 +39,10 @@ apps/api/logs/
 
 # Playwright MCP scratch output
 .playwright-mcp/
+
+# Playwright artefacts
+apps/web/test-results/
+apps/web/playwright-report/
+
+# Downloaded photography (regenerate with: python scripts/fetch_images.py)
+# Committed deliberately so the deploy needs no extra step.

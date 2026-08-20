@@ -1,0 +1,46 @@
+# Render Blueprint — backend only. The frontend goes to Vercel.
+#
+# Secret VALUES are never committed. Every one is `sync: false`, which declares
+# the key and leaves the value to be supplied once, either in the Render
+# dashboard or by `python scripts/render_sync_env.py`.
+#
+# Free-tier note, because it bites: Render grants 750 instance-hours per
+# WORKSPACE per calendar month, not per service. A calendar month is ~730
+# hours, so exactly ONE always-on free service fits. Keeping two warm exhausts
+# the quota and Render then suspends every free service until the next month.
+# See docs/DEPLOY.md.
+
+services:
+  - type: web
+    name: coinfold-api
+    runtime: docker
+    dockerfilePath: ./apps/api/Dockerfile
+    # Build context is the repo root: the image needs both db/ and apps/api/.
+    dockerContext: .
+    plan: free
+    region: singapore
+    branch: main
+    autoDeploy: true
+
+    # Dependency-free endpoint, so the keep-warm ping costs no database work.
+    healthCheckPath: /health
+
+    envVars:
+      # Supabase session-pooler connection string.
+      - key: DATABASE_URL
+        sync: false
+      # 32+ random characters. Startup fails loudly if it is missing or a
+      # placeholder, rather than running on a guessable secret.
+      - key: JWT_SECRET
+        sync: false
+      # The deployed Vercel origin. No wildcard: credentialed CORS rejects "*".
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+      # Free-tier Postgres allows few connections and Supabase's pooler fewer
+      # still, so the pool stays deliberately small.
+      - key: DB_POOL_MIN
+        value: "1"
+      - key: DB_POOL_MAX
+        value: "5"

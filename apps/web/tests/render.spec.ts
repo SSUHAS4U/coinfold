@@ -77,7 +77,7 @@ test.describe("landing", () => {
     // Chapter 4: the coin figure lands on the real seeded balance.
     await page.evaluate(() => window.scrollTo(0, window.innerHeight * 3.7));
     await page.waitForTimeout(500);
-    await expect(page.getByText("362,629")).toBeVisible();
+    await expect(page.getByText("3,62,629")).toBeVisible();
     await page.screenshot({ path: "test-results/landing-04-coins.png" });
   });
 
@@ -89,8 +89,12 @@ test.describe("landing", () => {
 
     // With motion disabled the story is laid out in full rather than pinned,
     // so all four chapters are present at once and nothing is hidden.
-    await expect(page.getByText("362,629")).toBeVisible();
-    await expect(page.getByText("10,000")).toHaveCount(2); // hero copy + chapter 2
+    await expect(page.getByText("3,62,629")).toBeVisible();
+    // "10,000" legitimately appears several times once the story is laid out
+    // flat (hero copy, the chapter-2 figure, the features list). The property
+    // that matters is that the chapters rendered at all, not an exact count.
+    expect(await page.getByText("10,000").count()).toBeGreaterThanOrEqual(2);
+    await expect(page.getByText("Ten categories,")).toBeVisible();
     await expectNoHorizontalScroll(page);
     await page.screenshot({ path: "test-results/landing-reduced-motion.png", fullPage: true });
     await context.close();
@@ -103,7 +107,7 @@ test.describe("dashboard", () => {
     await signIn(page);
 
     await expect(page.getByText("10,000").first()).toBeVisible();
-    await expect(page.getByText("362,629").first()).toBeVisible();
+    await expect(page.getByText("3,62,629").first()).toBeVisible();
     await expectNoHorizontalScroll(page);
     await page.screenshot({ path: "test-results/dash-dark.png", fullPage: true });
   });
@@ -201,9 +205,9 @@ test.describe("table behaviour", () => {
     await page.waitForTimeout(700);
 
     // Pagination moves to page 2 and marks it current.
-    await page.getByRole("button", { name: "Page 2" }).click();
+    await page.getByRole("button", { name: "Page 2", exact: true }).click();
     await page.waitForTimeout(700);
-    await expect(page.getByRole("button", { name: "Page 2" })).toHaveAttribute(
+    await expect(page.getByRole("button", { name: "Page 2", exact: true })).toHaveAttribute(
       "aria-current",
       "page",
     );
@@ -284,9 +288,24 @@ test.describe("rewards", () => {
     await page.setViewportSize({ width: 1440, height: 950 });
     await signIn(page);
 
-    const before = Number(
-      (await page.locator("header p.tnum").first().innerText()).replace(/[^\d]/g, ""),
-    );
+    // The HUD counts up to its value over ~700ms, so "not an em dash" is not
+    // the same as "settled" — reading it early catches a frame mid-animation.
+    // Poll until two consecutive reads agree.
+    const hud = page.locator("header p.tnum").first();
+    const settledBalance = async (): Promise<number> => {
+      let last = -1;
+      for (let i = 0; i < 40; i += 1) {
+        const text = (await hud.innerText()).replace(/[^\d]/g, "");
+        const value = text === "" ? -1 : Number(text);
+        if (value > 0 && value === last) return value;
+        last = value;
+        await page.waitForTimeout(250);
+      }
+      throw new Error("coin balance never settled");
+    };
+
+    const before = await settledBalance();
+    expect(before).toBeGreaterThan(0);
 
     await page.getByRole("button", { name: "Redeem" }).first().click();
     await expect(page.getByRole("dialog")).toBeVisible();
@@ -298,9 +317,7 @@ test.describe("rewards", () => {
     await page.getByRole("button", { name: "Done" }).click();
     await page.waitForTimeout(900);
 
-    const after = Number(
-      (await page.locator("header p.tnum").first().innerText()).replace(/[^\d]/g, ""),
-    );
+    const after = await settledBalance();
     expect(after).toBeLessThan(before);
   });
 });

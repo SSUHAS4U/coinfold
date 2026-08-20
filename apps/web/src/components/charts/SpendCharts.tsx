@@ -159,7 +159,9 @@ export const CategoryDonut = memo(function CategoryDonut({
                 onClick={() => onSelect(d.category_slug)}
                 aria-pressed={isSelected}
                 className={[
-                  "flex w-full items-center gap-3 border-b border-border py-2.5 text-left",
+                  // min-h-11 is the 44px touch floor. py-2.5 alone produced 41px rows,
+                  // which the render tests reject at phone widths.
+                  "flex min-h-11 w-full items-center gap-3 border-b border-border py-2.5 text-left",
                   "transition-colors duration-[var(--t-interaction)]",
                   isSelected ? "text-text" : "text-text-dim hover:text-text",
                 ].join(" ")}

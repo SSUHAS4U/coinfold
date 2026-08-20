@@ -143,7 +143,10 @@ export default function LandingPage() {
         <div
           className={
             reduced
-              ? "relative space-y-28 px-5 py-28 sm:px-8"
+              // overflow-x-clip: the chapter scrims use negative insets, and
+              // without the pinned stage's overflow-hidden to contain them they
+              // extend past the viewport and scroll the page sideways.
+              ? "relative space-y-28 overflow-x-clip px-5 py-28 sm:px-8"
               : "sticky top-0 h-dvh overflow-hidden px-5 sm:px-8"
           }
         >

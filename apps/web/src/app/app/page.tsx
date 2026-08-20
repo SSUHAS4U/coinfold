@@ -73,8 +73,12 @@ function StatRow({
   coins: number;
   loading: boolean;
 }) {
-  const stats: { label: string; value: string; tone?: string }[] = [
-    { label: "Total spent", value: money(spend) },
+  // The full figure (₹6,20,42,662.87) does not fit a 360px column and was
+  // truncating to "₹6,20,42,66…", which is worse than useless — a partial
+  // number reads as a real one. Narrow viewports get the compact form
+  // (₹6.2Cr) instead, which is exact enough to act on and always fits.
+  const stats: { label: string; value: string; compact?: string; tone?: string }[] = [
+    { label: "Total spent", value: money(spend), compact: moneyCompact(spend) },
     // The label already carries the direction, so the figure is shown as a
     // magnitude. "Refunded -₹10.3L" reads as money lost, which is backwards.
     {
@@ -103,8 +107,16 @@ function StatRow({
               <span
                 className="tnum mt-1 block truncate text-[22px] font-semibold tracking-[-0.02em]"
                 style={{ color: stat.tone ?? "var(--text)" }}
+                title={stat.value}
               >
-                {stat.value}
+                {stat.compact ? (
+                  <>
+                    <span className="sm:hidden">{stat.compact}</span>
+                    <span className="hidden sm:inline">{stat.value}</span>
+                  </>
+                ) : (
+                  stat.value
+                )}
               </span>
             )}
           </dd>
