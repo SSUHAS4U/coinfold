@@ -46,3 +46,10 @@ apps/web/playwright-report/
 
 # Downloaded photography (regenerate with: python scripts/fetch_images.py)
 # Committed deliberately so the deploy needs no extra step.
+
+# The assignment brief is marked Confidential by Digital Alpha Technologies.
+# Kept locally, never published.
+FullStack - Assignment.pdf
+
+# Third-party reference screenshots (kept in ~/.claude/design-library instead)
+refs/wise-*.png
