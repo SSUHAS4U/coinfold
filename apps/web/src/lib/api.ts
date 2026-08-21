@@ -40,10 +40,9 @@ function networkFault(cause: unknown): ApiError {
     id: "NETWORK_UNREACHABLE",
     what: "Could not reach the Coinfold server.",
     why:
-      "The request never completed. The server may be waking from sleep — a " +
-      "free hosting tier idles after 15 minutes and takes around 30 seconds " +
-      "to come back.",
-    action: "Wait about thirty seconds and press Retry.",
+      "The API may be waking from its scheduled free-tier rest period. Render " +
+      "can take up to 50 seconds to bring an idle instance back.",
+    action: "Wait up to fifty seconds, then press Retry.",
     context: { cause: String(cause) },
   });
 }

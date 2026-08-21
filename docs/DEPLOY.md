@@ -118,16 +118,17 @@ rather than dashboard clicking.
 
 ## 4. Keep the backend warm
 
-`.github/workflows/keep-warm.yml` pings `/health` every 10 minutes so a reviewer
-never hits a 50-second cold start.
+`.github/workflows/keep-warm.yml` pings `/health` every 10 minutes on weekdays
+between 06:00 and 17:50 UTC. That keeps the reviewer window warm while using
+about 260 Render instance-hours per month, safely below the 750-hour
+per-workspace quota. Outside that window the frontend explains that the free
+instance may take up to 50 seconds to wake, and the user can retry.
 
 1. Confirm you have freed the quota (top of this document).
-2. Repo **Settings → Secrets and variables → Actions → Variables** → add
-   `HEALTH_URL` = `https://<service>.onrender.com/health`.
-3. Run it once manually from the **Actions** tab to confirm it goes green.
+2. Run it once manually from the **Actions** tab to confirm it goes green.
 
 `/health` opens no database connection, so this costs no Supabase quota — only
-Render instance-hours, which is exactly what it is buying.
+the bounded Render instance-hours described above.
 
 ---
 
