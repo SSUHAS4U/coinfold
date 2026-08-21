@@ -2,10 +2,10 @@ name: Keep Coinfold API Warm
 
 on:
   workflow_dispatch:
-  # Weekdays only, 06:00-17:50 UTC. This is about 260 instance-hours/month,
-  # leaving room under Render's 750-hour per-workspace free-tier quota.
+  # Keep the service warm for 23 hours/day. The one-hour gap keeps the worst
+  # case below 750 Render instance-hours in a 31-day month.
   schedule:
-    - cron: "*/10 6-17 * * 1-5"
+    - cron: "*/10 0-22 * * *"
 
 jobs:
   ping:
