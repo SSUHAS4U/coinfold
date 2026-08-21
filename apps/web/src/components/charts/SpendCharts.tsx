@@ -1,7 +1,7 @@
 "use client";
 
 import { ChartPie, LineChart as LineIcon } from "lucide-react";
-import { memo, useMemo } from "react";
+import { memo, useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -67,6 +67,7 @@ export const CategoryDonut = memo(function CategoryDonut({
   selected: string[];
   onSelect: (slug: string) => void;
 }) {
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const total = useMemo(
     () => data.reduce((sum, d) => sum + Number(d.total), 0),
     [data],
@@ -116,6 +117,10 @@ export const CategoryDonut = memo(function CategoryDonut({
                 const slug = (entry as unknown as CategorySpend)?.category_slug;
                 if (slug) onSelect(slug);
               }}
+              onMouseEnter={(entry) => {
+                setHoveredCategory((entry as unknown as CategorySpend)?.category_slug ?? null);
+              }}
+              onMouseLeave={() => setHoveredCategory(null)}
             >
               {data.map((d) => {
                 const dimmed = selected.length > 0 && !selected.includes(d.category_slug);
@@ -137,7 +142,12 @@ export const CategoryDonut = memo(function CategoryDonut({
         </ResponsiveContainer>
 
         {/* The hole is not empty: it carries the total the ring adds up to. */}
-        <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
+        <div
+          className={[
+            "pointer-events-none absolute inset-0 grid place-items-center text-center transition-opacity duration-[var(--t-interaction)]",
+            hoveredCategory ? "opacity-0" : "opacity-100",
+          ].join(" ")}
+        >
           <div>
             <p className="text-[11px] tracking-[0.02em] text-text-faint">Total spend</p>
             <p className="tnum mt-1 text-[19px] font-semibold tracking-[-0.01em] text-text">
