@@ -165,6 +165,12 @@ export function useDashboard() {
   const refresh = useCallback(() => setNonce((n) => n + 1), []);
 
   const apiQuery = useMemo(() => toApiQuery(effective), [effective]);
+  // Keep the full category set available to the donut so a selected slice can
+  // be highlighted while the remaining slices stay visible and dimmed.
+  const categoryQuery = useMemo(
+    () => ({ ...apiQuery, categories: [] }),
+    [apiQuery],
+  );
   const queryKey = useMemo(
     () => `${nonce}:${JSON.stringify(apiQuery)}`,
     [nonce, apiQuery],
@@ -235,7 +241,7 @@ export function useDashboard() {
         (error) => setSummary({ key: queryKey, data: null, error }),
       ),
       settle(
-        api.byCategory(apiQuery, controller.signal),
+        api.byCategory(categoryQuery, controller.signal),
         (data) => setCategory({ key: queryKey, data, error: null }),
         (error) => setCategory({ key: queryKey, data: [], error }),
       ),
@@ -247,7 +253,7 @@ export function useDashboard() {
     ]);
 
     return () => controller.abort();
-  }, [apiQuery, queryKey]);
+  }, [apiQuery, categoryQuery, queryKey]);
 
   // Facets do not depend on the filters, so they are fetched once.
   useEffect(() => {
