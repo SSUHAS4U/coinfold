@@ -310,6 +310,41 @@ def report(conn: psycopg.Connection, loaded: int, failures: list[str]) -> None:
             print(f"    {line}")
 
 
+def _seed_database(conn: psycopg.Connection, rows: list[dict[str, Any]], reset: bool) -> int:
+    apply_migrations(conn, reset)
+    category_ids, user_id = seed_reference(conn)
+    merchant_ids = seed_merchants(conn, rows)
+
+    loadable, anomalies, failures = normalise_rows(rows, category_ids, merchant_ids)
+    if failures and not loadable:
+        raise NormalisationError("feed", len(failures), "every row failed to normalise")
+
+    copy_transactions(conn, user_id, loadable)
+    load_anomalies(conn, anomalies)
+    mint_coin_ledger(conn, user_id)
+    report(conn, len(loadable), failures)
+    return len(loadable)
+
+
+def ensure_seeded(database_url: str, feed: Path = DEFAULT_FEED) -> bool:
+    """Create the schema and demo data only when the database is empty."""
+    rows = load_feed(feed)
+    with psycopg.connect(database_url, autocommit=False) as conn:
+        conn.execute("SELECT pg_advisory_xact_lock(hashtext('coinfold-auto-seed'))")
+        has_transactions = conn.execute(
+            "SELECT to_regclass('public.transaction') IS NOT NULL"
+        ).fetchone()[0]
+        if has_transactions:
+            count = conn.execute("SELECT count(*) FROM transaction").fetchone()[0]
+            if count > 0:
+                conn.rollback()
+                return False
+
+        _seed_database(conn, rows, reset=has_transactions)
+        conn.commit()
+        return True
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Create the schema and load the feed.")
     parser.add_argument(
@@ -336,20 +371,7 @@ def main(argv: list[str] | None = None) -> int:
     # autocommit=False: the whole seed is one transaction, so a failure leaves
     # the database exactly as it was.
     with psycopg.connect(args.database_url, autocommit=False) as conn:
-        apply_migrations(conn, args.reset)
-        category_ids, user_id = seed_reference(conn)
-        merchant_ids = seed_merchants(conn, rows)
-
-        loadable, anomalies, failures = normalise_rows(rows, category_ids, merchant_ids)
-        if failures and not loadable:
-            conn.rollback()
-            print("every row failed to normalise; nothing was written")
-            return 1
-
-        copy_transactions(conn, user_id, loadable)
-        load_anomalies(conn, anomalies)
-        mint_coin_ledger(conn, user_id)
-        report(conn, len(loadable), failures)
+        _seed_database(conn, rows, reset=args.reset)
         conn.commit()
 
     print("\nSeed complete.")

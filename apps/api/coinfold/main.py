@@ -28,6 +28,7 @@ from coinfold.core.config import get_settings
 from coinfold.core.errors import FAULTS, AppFault
 from coinfold.core.logging import configure_logging, log_event, new_trace_id, trace_id_var
 from coinfold.db import pool
+from coinfold.ingest.seed import ensure_seeded
 
 
 @asynccontextmanager
@@ -39,11 +40,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         min_size=settings.db_pool_min,
         max_size=settings.db_pool_max,
     )
+    seeded = ensure_seeded(settings.database_url)
     log_event(
         logging.INFO,
         "api started",
         environment=settings.environment,
         registered_faults=len(FAULTS),
+        database_seeded=seeded,
     )
     try:
         yield
