@@ -42,13 +42,13 @@ function ChartTooltip({
   const datum = (entry.payload ?? {}) as Record<string, unknown>;
 
   return (
-    <div className="rounded-[var(--r-control)] border border-border-strong bg-surface-2 px-3 py-2 shadow-[var(--shadow-2)]">
-      <p className="text-[12px] text-text-dim">
+    <div className="rounded-[var(--r-control)] border border-[var(--line-strong)] bg-[var(--content-hover)] px-3 py-2 shadow-[var(--shadow-float)]">
+      <p className="text-[12px] text-ink-dim">
         {labelFormatter ? labelFormatter(datum) : (entry.name ?? "")}
       </p>
-      <p className="tnum mt-0.5 text-[14px] font-medium text-text">{money(entry.value ?? 0)}</p>
+      <p className="tnum mt-0.5 text-[14px] font-medium text-ink">{money(entry.value ?? 0)}</p>
       {typeof datum.transactions === "number" && (
-        <p className="tnum mt-0.5 text-[12px] text-text-faint">
+        <p className="tnum mt-0.5 text-[12px] text-ink-faint">
           {datum.transactions.toLocaleString("en-IN")} transactions
         </p>
       )}
@@ -129,7 +129,7 @@ export const CategoryDonut = memo(function CategoryDonut({
                     key={d.category_slug}
                     fill={categoryColor(d.accent_hue)}
                     opacity={dimmed ? 0.22 : 1}
-                    className="cursor-pointer transition-opacity duration-[var(--t-state)]"
+                    className="cursor-pointer transition-opacity duration-[var(--t-move)]"
                   />
                 );
               })}
@@ -144,13 +144,13 @@ export const CategoryDonut = memo(function CategoryDonut({
         {/* The hole is not empty: it carries the total the ring adds up to. */}
         <div
           className={[
-            "pointer-events-none absolute inset-0 grid place-items-center text-center transition-opacity duration-[var(--t-interaction)]",
+            "pointer-events-none absolute inset-0 grid place-items-center text-center transition-opacity duration-[var(--t-hover)]",
             hoveredCategory ? "opacity-0" : "opacity-100",
           ].join(" ")}
         >
           <div>
-            <p className="text-[11px] tracking-[0.02em] text-text-faint">Total spend</p>
-            <p className="tnum mt-1 text-[19px] font-semibold tracking-[-0.01em] text-text">
+            <p className="text-[11px] tracking-[0.02em] text-ink-faint">Total spend</p>
+            <p className="tnum mt-1 text-[19px] font-semibold tracking-[-0.01em] text-ink">
               {moneyCompact(total)}
             </p>
           </div>
@@ -171,9 +171,9 @@ export const CategoryDonut = memo(function CategoryDonut({
                 className={[
                   // min-h-11 is the 44px touch floor. py-2.5 alone produced 41px rows,
                   // which the render tests reject at phone widths.
-                  "flex min-h-11 w-full items-center gap-3 border-b border-border py-2.5 text-left",
-                  "transition-colors duration-[var(--t-interaction)]",
-                  isSelected ? "text-text" : "text-text-dim hover:text-text",
+                  "flex min-h-11 w-full items-center gap-3 border-b border-[var(--line)] py-2.5 text-left",
+                  "transition-colors duration-[var(--t-hover)]",
+                  isSelected ? "text-ink" : "text-ink-dim hover:text-ink",
                 ].join(" ")}
               >
                 <span
@@ -182,10 +182,10 @@ export const CategoryDonut = memo(function CategoryDonut({
                   style={{ background: categoryColor(d.accent_hue) }}
                 />
                 <span className="min-w-0 flex-1 truncate text-[13px]">{d.category_label}</span>
-                <span className="tnum shrink-0 text-[13px] text-text">
+                <span className="tnum shrink-0 text-[13px] text-ink">
                   {moneyCompact(d.total)}
                 </span>
-                <span className="tnum w-11 shrink-0 text-right text-[12px] text-text-faint">
+                <span className="tnum w-11 shrink-0 text-right text-[12px] text-ink-faint">
                   {share.toFixed(1)}%
                 </span>
               </button>
@@ -246,22 +246,22 @@ export const MonthlyTrend = memo(function MonthlyTrend({
           <XAxis
             dataKey="month"
             tickFormatter={monthLabel}
-            tick={{ fill: "var(--text-faint)", fontSize: 11 }}
-            axisLine={{ stroke: "var(--border)" }}
+            tick={{ fill: "var(--ink-faint)", fontSize: 11 }}
+            axisLine={{ stroke: "var(--line)" }}
             tickLine={false}
             interval="preserveStartEnd"
             minTickGap={24}
           />
           <YAxis
             tickFormatter={(v) => moneyCompact(v as number)}
-            tick={{ fill: "var(--text-faint)", fontSize: 11 }}
+            tick={{ fill: "var(--ink-faint)", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             width={64}
           />
           <Tooltip
             content={<ChartTooltip labelFormatter={(d) => monthLabel(String(d.month ?? ""))} />}
-            cursor={{ stroke: "var(--border-strong)", strokeWidth: 1 }}
+            cursor={{ stroke: "var(--line-strong)", strokeWidth: 1 }}
           />
           <Area
             type="monotone"
@@ -275,7 +275,7 @@ export const MonthlyTrend = memo(function MonthlyTrend({
             activeDot={{
               r: 4,
               fill: "var(--accent)",
-              stroke: "var(--bg)",
+              stroke: "var(--canvas)",
               strokeWidth: 2,
               className: "cursor-pointer",
             }}
@@ -285,7 +285,7 @@ export const MonthlyTrend = memo(function MonthlyTrend({
       </ResponsiveContainer>
 
       {selectedMonth && (
-        <p className="mt-2 text-[12px] text-text-faint">
+        <p className="mt-2 text-[12px] text-ink-faint">
           Filtered to {monthLabel(selectedMonth)}. Click the month again to clear.
         </p>
       )}

@@ -7,7 +7,7 @@ import { FilterBar } from "@/components/dashboard/FilterBar";
 import { Pagination } from "@/components/dashboard/Pagination";
 import { TransactionDrawer } from "@/components/dashboard/TransactionDrawer";
 import { TransactionTable } from "@/components/table/TransactionTable";
-import { Panel } from "@/components/ui/Primitives";
+import { Surface } from "@/components/ui/Primitives";
 import type { Transaction } from "@/lib/api";
 
 /**
@@ -24,7 +24,7 @@ export default function TransactionsPage() {
 
   return (
     <>
-      <Panel padded={false}>
+      <Surface padded={false}>
         <div className="p-6 pb-0">
           <FilterBar
             query={query}
@@ -71,7 +71,7 @@ export default function TransactionsPage() {
             onPageSize={(pageSize) => dispatch({ type: "set", patch: { pageSize } })}
           />
         </div>
-      </Panel>
+      </Surface>
 
       <TransactionDrawer row={openRow} onClose={() => setOpenRow(null)} />
     </>

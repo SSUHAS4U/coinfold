@@ -64,7 +64,6 @@ export default function SignupPage() {
   return (
     <AuthShell
       image="/img/auth-signup.jpg"
-      imagePosition="50% 45%"
       eyebrow="Start earning"
       headline={<>A coin for every hundred rupees.</>}
       blurb="Your account arrives with the full sample statement already loaded, so there is something to look at from the first second."
@@ -74,10 +73,10 @@ export default function SignupPage() {
         ["₹1,000", "top reward"],
       ]}
     >
-      <h1 className="text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] text-text">
+      <h1 className="text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] text-ink">
         Create your account
       </h1>
-      <p className="mt-2 text-[14px] leading-relaxed text-text-dim">
+      <p className="mt-2 text-[14px] leading-relaxed text-ink-dim">
         Takes about fifteen seconds. No card required.
       </p>
 
@@ -126,14 +125,14 @@ export default function SignupPage() {
                 aria-hidden
                 className="grid size-4 shrink-0 place-items-center rounded-full border transition-colors"
                 style={{
-                  borderColor: rule.met ? "var(--accent)" : "var(--border-strong)",
+                  borderColor: rule.met ? "var(--accent)" : "var(--line-strong)",
                   background: rule.met ? "var(--accent)" : "transparent",
                   color: "var(--on-accent)",
                 }}
               >
                 {rule.met && <Check size={10} strokeWidth={3} />}
               </span>
-              <span style={{ color: rule.met ? "var(--text-dim)" : "var(--text-faint)" }}>
+              <span style={{ color: rule.met ? "var(--ink-dim)" : "var(--ink-faint)" }}>
                 {rule.label}
               </span>
             </li>
@@ -156,13 +155,13 @@ export default function SignupPage() {
 
       <Link
         href="/login"
-        className="mt-5 inline-flex items-center gap-1.5 text-[13px] text-text-dim underline-offset-4 transition-colors hover:text-text hover:underline"
+        className="mt-5 inline-flex items-center gap-1.5 text-[13px] text-ink-dim underline-offset-4 transition-colors hover:text-ink hover:underline"
       >
         I already have an account
         <ArrowRight size={13} aria-hidden />
       </Link>
 
-      <p className="mt-8 border-t border-border pt-5 text-[12px] leading-relaxed text-text-faint">
+      <p className="mt-8 border-t border-[var(--line)] pt-5 text-[12px] leading-relaxed text-ink-faint">
         New accounts receive their own copy of the sample statement — 10,000 transactions and the
         coin ledger derived from them — so the dashboard is populated immediately.
       </p>

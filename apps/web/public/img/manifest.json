@@ -1,51 +1,135 @@
 {
-  "story-1-coin": {
-    "file": "/img/story-1-coin.jpg",
-    "source": "https://images.pexels.com/photos/14856617/pexels-photo-14856617.jpeg",
+  "cat-food-dining": {
+    "file": "/img/cat-food-dining.jpg",
+    "source": "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg",
     "provider": "Pexels",
     "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
-    "bytes": 508410
+    "bytes": 207404
   },
-  "story-2-city": {
-    "file": "/img/story-2-city.jpg",
-    "source": "https://images.pexels.com/photos/26732100/pexels-photo-26732100.jpeg",
+  "cat-travel": {
+    "file": "/img/cat-travel.jpg",
+    "source": "https://images.pexels.com/photos/1008155/pexels-photo-1008155.jpeg",
     "provider": "Pexels",
     "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
-    "bytes": 355050
+    "bytes": 188849
   },
-  "story-3-flow": {
-    "file": "/img/story-3-flow.jpg",
-    "source": "https://images.pexels.com/photos/21031387/pexels-photo-21031387.jpeg",
+  "cat-shopping": {
+    "file": "/img/cat-shopping.jpg",
+    "source": "https://images.pexels.com/photos/5872361/pexels-photo-5872361.jpeg",
     "provider": "Pexels",
     "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
-    "bytes": 1372604
+    "bytes": 59257
   },
-  "story-4-coins": {
-    "file": "/img/story-4-coins.jpg",
-    "source": "https://images.pexels.com/photos/7584354/pexels-photo-7584354.jpeg",
+  "cat-groceries": {
+    "file": "/img/cat-groceries.jpg",
+    "source": "https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg",
     "provider": "Pexels",
     "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
-    "bytes": 360022
+    "bytes": 216881
   },
-  "auth-signin": {
-    "file": "/img/auth-signin.jpg",
-    "source": "https://images.pexels.com/photos/8358039/pexels-photo-8358039.jpeg",
+  "cat-health": {
+    "file": "/img/cat-health.jpg",
+    "source": "https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg",
     "provider": "Pexels",
     "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
-    "bytes": 561794
+    "bytes": 116892
   },
-  "auth-signup": {
-    "file": "/img/auth-signup.jpg",
+  "cat-fuel": {
+    "file": "/img/cat-fuel.jpg",
+    "source": "https://images.pexels.com/photos/9800029/pexels-photo-9800029.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 290296
+  },
+  "cat-education": {
+    "file": "/img/cat-education.jpg",
+    "source": "https://images.pexels.com/photos/5905445/pexels-photo-5905445.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 90542
+  },
+  "cat-entertainment": {
+    "file": "/img/cat-entertainment.jpg",
+    "source": "https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 115139
+  },
+  "cat-utilities": {
+    "file": "/img/cat-utilities.jpg",
+    "source": "https://images.pexels.com/photos/3306057/pexels-photo-3306057.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 203342
+  },
+  "cat-insurance": {
+    "file": "/img/cat-insurance.jpg",
+    "source": "https://images.pexels.com/photos/7731375/pexels-photo-7731375.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 213491
+  },
+  "hero-1-evening": {
+    "file": "/img/hero-1-evening.jpg",
+    "source": "https://images.pexels.com/photos/13663208/pexels-photo-13663208.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 1107054
+  },
+  "hero-2-street": {
+    "file": "/img/hero-2-street.jpg",
+    "source": "https://images.pexels.com/photos/29446768/pexels-photo-29446768.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 392739
+  },
+  "hero-3-desk": {
+    "file": "/img/hero-3-desk.jpg",
+    "source": "https://images.pexels.com/photos/30473581/pexels-photo-30473581.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 457733
+  },
+  "hero-4-gold": {
+    "file": "/img/hero-4-gold.jpg",
     "source": "https://images.pexels.com/photos/7584362/pexels-photo-7584362.jpeg",
     "provider": "Pexels",
     "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
-    "bytes": 422947
+    "bytes": 469671
   },
-  "app-banner": {
-    "file": "/img/app-banner.jpg",
-    "source": "https://images.pexels.com/photos/28795083/pexels-photo-28795083.jpeg",
+  "auth-signin": {
+    "file": "/img/auth-signin.jpg",
+    "source": "https://images.pexels.com/photos/4386370/pexels-photo-4386370.jpeg",
     "provider": "Pexels",
     "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
-    "bytes": 625124
+    "bytes": 508933
+  },
+  "auth-signup": {
+    "file": "/img/auth-signup.jpg",
+    "source": "https://images.pexels.com/photos/5900226/pexels-photo-5900226.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 470543
+  },
+  "story-pay": {
+    "file": "/img/story-pay.jpg",
+    "source": "https://images.pexels.com/photos/6963944/pexels-photo-6963944.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 282437
+  },
+  "story-review": {
+    "file": "/img/story-review.jpg",
+    "source": "https://images.pexels.com/photos/6289065/pexels-photo-6289065.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 43217
+  },
+  "story-reward": {
+    "file": "/img/story-reward.jpg",
+    "source": "https://images.pexels.com/photos/6289028/pexels-photo-6289028.jpeg",
+    "provider": "Pexels",
+    "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
+    "bytes": 62269
   }
 }

@@ -1,23 +1,51 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Instrument_Serif, Inter } from "next/font/google";
 
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+/**
+ * Inter, with the OpenType features that make financial figures behave:
+ * tabular numerals for alignment, cv01/cv03 for a single-storey `a` and an
+ * open `g`, which is what gives it the SF-adjacent feel the design calls for.
+ */
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+  axes: ["opsz"],
+});
+
+/**
+ * The display face. The design skill's rule is explicit — never Inter or
+ * Roboto as display — because a system sans set large is the single clearest
+ * tell of a generated page. Instrument Serif is high-contrast and editorial,
+ * and it gives the hero a voice the body copy does not have.
+ */
+const display = Instrument_Serif({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "Coinfold — pay the bill, keep the change",
+  title: "Coinfold — see your money move",
   description:
-    "Pay credit-card bills, earn a coin for every ₹100, and see exactly where the money went.",
+    "Pay credit-card bills, earn a coin for every ₹100, and watch 10,000 transactions turn into something you can actually read.",
 };
 
 export const viewport: Viewport = {
-  // Matches --bg so the mobile browser chrome does not sit as a light band
-  // above a near-black page.
-  themeColor: "#08090a",
+  // Two entries so the mobile browser chrome matches the canvas in each theme
+  // rather than sitting as a mismatched band above the page.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f5f5f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0b0f" },
+  ],
   width: "device-width",
   initialScale: 1,
+  // The scroll story pins a stage; letting it zoom out mid-pin breaks the
+  // geometry. Users can still zoom in, which is what accessibility requires.
+  maximumScale: 5,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -25,19 +53,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en-IN" suppressHydrationWarning>
       <head>
         {/*
-          Applies the saved theme before first paint. Without this the page
-          renders dark, then flips to light on hydration — a visible flash on
-          every load for anyone who chose light.
-
-          Dark is the default: only an explicit "light" preference switches.
+          Applies the saved theme before first paint. Light is the default now,
+          so only an explicit "dark" preference — or the OS asking for dark when
+          the user has expressed no preference — adds the class. Without this
+          the page paints light then flips, which is a visible flash on every
+          load for anyone using dark.
         */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{if(localStorage.getItem('coinfold.theme')==='light'){document.documentElement.classList.add('light')}}catch(e){}`,
+            __html: `try{var t=localStorage.getItem('coinfold.theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}`,
           }}
         />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} ${display.variable} antialiased`}>{children}</body>
     </html>
   );
 }

@@ -98,7 +98,7 @@ export function RewardsPanel({
     return (
       <div className="space-y-0">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 border-b border-border py-4">
+          <div key={i} className="flex items-center gap-4 border-b border-[var(--line)] py-4">
             <div className="flex-1 space-y-2">
               <Skeleton className="h-3.5 w-36" />
               <Skeleton className="h-3 w-52" />
@@ -129,38 +129,38 @@ export function RewardsPanel({
           return (
             <li
               key={reward.id}
-              className="flex items-center gap-4 border-b border-border py-4 last:border-b-0"
+              className="flex items-center gap-4 border-b border-[var(--line)] py-4 last:border-b-0"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="truncate text-[14px] font-medium text-text">{reward.title}</p>
-                  <span className="tnum shrink-0 text-[12px] text-text-faint">
+                  <p className="truncate text-[14px] font-medium text-ink">{reward.title}</p>
+                  <span className="tnum shrink-0 text-[12px] text-ink-faint">
                     worth {money(reward.rupee_value)}
                   </span>
                 </div>
-                <p className="mt-0.5 truncate text-[12px] text-text-faint">{reward.description}</p>
+                <p className="mt-0.5 truncate text-[12px] text-ink-faint">{reward.description}</p>
 
                 {/* The shortfall is stated in words, not implied by a disabled
                     button. A disabled control with no reason is a dead end. */}
                 {!reward.affordable && (
-                  <p className="tnum mt-1 text-[12px]" style={{ color: "var(--warning)" }}>
+                  <p className="tnum mt-1 text-[12px]" style={{ color: "var(--hold)" }}>
                     {count(reward.coins_short)} more coins needed
                   </p>
                 )}
                 {reward.in_stock && reward.stock !== null && reward.stock <= 20 && (
-                  <p className="tnum mt-1 text-[12px] text-text-faint">
+                  <p className="tnum mt-1 text-[12px] text-ink-faint">
                     only {reward.stock} left
                   </p>
                 )}
                 {!reward.in_stock && (
-                  <p className="mt-1 text-[12px]" style={{ color: "var(--danger)" }}>
+                  <p className="mt-1 text-[12px]" style={{ color: "var(--down)" }}>
                     Sold out
                   </p>
                 )}
               </div>
 
               <div className="flex shrink-0 items-center gap-3">
-                <span className="tnum inline-flex items-center gap-1.5 text-[13px] text-text">
+                <span className="tnum inline-flex items-center gap-1.5 text-[13px] text-ink">
                   <Coins size={13} aria-hidden style={{ color: "var(--accent)" }} />
                   {count(reward.coin_cost)}
                 </span>
@@ -223,15 +223,15 @@ export function RewardsPanel({
               ].map(([label, value]) => (
                 <div
                   key={label}
-                  className="flex items-baseline justify-between border-b border-border py-2.5"
+                  className="flex items-baseline justify-between border-b border-[var(--line)] py-2.5"
                 >
-                  <dt className="text-[13px] text-text-dim">{label}</dt>
-                  <dd className="tnum text-[13px] text-text">{value}</dd>
+                  <dt className="text-[13px] text-ink-dim">{label}</dt>
+                  <dd className="tnum text-[13px] text-ink">{value}</dd>
                 </div>
               ))}
               <div className="flex items-baseline justify-between py-3">
-                <dt className="text-[13px] font-medium text-text">Balance after</dt>
-                <dd className="tnum text-[15px] font-semibold text-text">
+                <dt className="text-[13px] font-medium text-ink">Balance after</dt>
+                <dd className="tnum text-[15px] font-semibold text-ink">
                   {count(balance.balance - stage.reward.coin_cost)}
                 </dd>
               </div>
@@ -241,15 +241,15 @@ export function RewardsPanel({
               <div
                 className="rounded-[var(--r-control)] border px-3 py-2.5"
                 style={{
-                  borderColor: "color-mix(in oklab, var(--danger) 35%, transparent)",
-                  background: "color-mix(in oklab, var(--danger) 8%, transparent)",
+                  borderColor: "color-mix(in oklab, var(--down) 35%, transparent)",
+                  background: "color-mix(in oklab, var(--down) 8%, transparent)",
                 }}
               >
-                <p className="text-[13px] font-medium" style={{ color: "var(--danger)" }}>
+                <p className="text-[13px] font-medium" style={{ color: "var(--down)" }}>
                   {failure.fault.what}
                 </p>
-                <p className="mt-1 text-[12px] text-text-dim">{failure.fault.action}</p>
-                <p className="mt-1.5 text-[12px] text-text-faint">
+                <p className="mt-1 text-[12px] text-ink-dim">{failure.fault.action}</p>
+                <p className="mt-1.5 text-[12px] text-ink-faint">
                   Your balance was not changed.
                 </p>
               </div>
@@ -274,19 +274,19 @@ export function RewardsPanel({
           <div className="space-y-4">
             <div
               className="flex items-center gap-3 rounded-[var(--r-control)] px-3 py-3"
-              style={{ background: "var(--accent-quiet)" }}
+              style={{ background: "var(--accent-soft)" }}
             >
               <Check size={17} aria-hidden style={{ color: "var(--accent)" }} />
-              <p className="text-[13px] text-text">
+              <p className="text-[13px] text-ink">
                 {money(stage.result.rupee_value)} reward is yours.{" "}
                 {stage.result.replayed && "(This retry returned your original redemption.)"}
               </p>
             </div>
 
             <div>
-              <p className="text-[12px] tracking-[0.02em] text-text-faint">Voucher code</p>
+              <p className="text-[12px] tracking-[0.02em] text-ink-faint">Voucher code</p>
               <div className="mt-1.5 flex items-center gap-2">
-                <code className="tnum flex-1 rounded-[var(--r-control)] border border-border bg-surface-2 px-3 py-2.5 font-mono text-[14px] tracking-[0.08em] text-text">
+                <code className="tnum flex-1 rounded-[var(--r-control)] border border-[var(--line)] bg-[var(--content-hover)] px-3 py-2.5 font-mono text-[14px] tracking-[0.08em] text-ink">
                   {stage.result.voucher_code}
                 </code>
                 <Button
@@ -303,8 +303,8 @@ export function RewardsPanel({
               </div>
             </div>
 
-            <p className="tnum text-[13px] text-text-dim">
-              New balance: <span className="text-text">{count(stage.result.balance)}</span> coins
+            <p className="tnum text-[13px] text-ink-dim">
+              New balance: <span className="text-ink">{count(stage.result.balance)}</span> coins
             </p>
           </div>
         )}

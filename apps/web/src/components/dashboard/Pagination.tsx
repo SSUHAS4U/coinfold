@@ -40,11 +40,11 @@ function pageWindow(page: number, totalPages: number): (number | "gap")[] {
 }
 
 const stepClass =
-  "grid size-11 min-h-11 place-items-center rounded-[var(--r-control)] border border-border " +
-  "text-text-dim transition-colors duration-[var(--t-interaction)] " +
-  "hover:border-border-strong hover:text-text " +
-  "disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-border " +
-  "disabled:hover:text-text-dim";
+  "grid size-11 min-h-11 place-items-center rounded-[var(--r-control)] border border-[var(--line)] " +
+  "text-ink-dim transition-colors duration-[var(--t-hover)] " +
+  "hover:border-[var(--line-strong)] hover:text-ink " +
+  "disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-[var(--line)] " +
+  "disabled:hover:text-ink-dim";
 
 export function Pagination({ page, totalPages, total, pageSize, onPage, onPageSize }: Props) {
   const first = total === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -53,9 +53,9 @@ export function Pagination({ page, totalPages, total, pageSize, onPage, onPageSi
   return (
     <nav
       aria-label="Transaction pages"
-      className="flex flex-wrap items-center justify-between gap-4 border-t border-border px-1 pt-4"
+      className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--line)] px-1 pt-4"
     >
-      <p className="tnum text-[13px] text-text-faint">
+      <p className="tnum text-[13px] text-ink-faint">
         {total === 0 ? "No rows" : `${count(first)}–${count(last)} of ${count(total)}`}
       </p>
 
@@ -75,7 +75,7 @@ export function Pagination({ page, totalPages, total, pageSize, onPage, onPageSi
             <span
               key={`gap-${index}`}
               aria-hidden
-              className="grid size-11 place-items-center text-text-faint"
+              className="grid size-11 place-items-center text-ink-faint"
             >
               …
             </span>
@@ -88,10 +88,10 @@ export function Pagination({ page, totalPages, total, pageSize, onPage, onPageSi
               aria-current={item === page ? "page" : undefined}
               className={[
                 "tnum grid size-11 min-h-11 place-items-center rounded-[var(--r-control)]",
-                "text-[13px] transition-colors duration-[var(--t-interaction)]",
+                "text-[13px] transition-colors duration-[var(--t-hover)]",
                 item === page
-                  ? "border border-border-strong bg-surface-3 text-text"
-                  : "border border-transparent text-text-dim hover:bg-surface-2 hover:text-text",
+                  ? "border border-[var(--line-strong)] bg-[var(--content-active)] text-ink"
+                  : "border border-transparent text-ink-dim hover:bg-[var(--content-hover)] hover:text-ink",
               ].join(" ")}
             >
               {item}
@@ -110,13 +110,13 @@ export function Pagination({ page, totalPages, total, pageSize, onPage, onPageSi
         </button>
       </div>
 
-      <label className="flex items-center gap-2 text-[13px] text-text-faint">
+      <label className="flex items-center gap-2 text-[13px] text-ink-faint">
         Rows
         <select
           value={pageSize}
           onChange={(event) => onPageSize(Number(event.target.value))}
           aria-label="Rows per page"
-          className="tnum h-11 min-h-11 rounded-[var(--r-control)] border border-border bg-surface-1 px-2 text-[13px] text-text transition-colors hover:border-border-strong focus:border-accent focus:outline-none"
+          className="tnum h-11 min-h-11 rounded-[var(--r-control)] border border-[var(--line)] bg-[var(--content)] px-2 text-[13px] text-ink transition-colors hover:border-[var(--line-strong)] focus:border-accent focus:outline-none"
         >
           {[25, 50, 100].map((size) => (
             <option key={size} value={size}>

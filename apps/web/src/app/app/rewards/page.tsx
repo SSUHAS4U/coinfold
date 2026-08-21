@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import { useDashboardContext } from "@/components/app/DashboardContext";
 import { RewardsPanel } from "@/components/rewards/RewardsPanel";
-import { EmptyState, Panel, PanelHeading, Skeleton } from "@/components/ui/Primitives";
+import { EmptyState, Surface, SurfaceHead, Skeleton } from "@/components/ui/Primitives";
 import { api } from "@/lib/api";
 import { count, longDateTime, money } from "@/lib/format";
 
@@ -53,36 +53,36 @@ export default function RewardsPage() {
   return (
     <div className="space-y-6">
       {/* Balance, given its own space rather than only living in the top bar. */}
-      <Panel>
+      <Surface>
         <div className="flex flex-wrap items-end gap-x-12 gap-y-5">
           <div>
-            <p className="text-[12px] tracking-[0.02em] text-text-faint">Coin balance</p>
-            <p className="tnum mt-1.5 inline-flex items-center gap-2.5 text-[38px] font-semibold leading-none tracking-[-0.02em] text-text">
+            <p className="text-[12px] tracking-[0.02em] text-ink-faint">Coin balance</p>
+            <p className="tnum mt-1.5 inline-flex items-center gap-2.5 text-[38px] font-semibold leading-none tracking-[-0.02em] text-ink">
               <Coins size={26} aria-hidden style={{ color: "var(--accent)" }} />
               {rewardsState.loading && !balance ? "—" : count(balance?.balance ?? 0)}
             </p>
           </div>
           <div>
-            <p className="text-[12px] tracking-[0.02em] text-text-faint">Lifetime earned</p>
-            <p className="tnum mt-1.5 text-[19px] font-medium text-text-dim">
+            <p className="text-[12px] tracking-[0.02em] text-ink-faint">Lifetime earned</p>
+            <p className="tnum mt-1.5 text-[19px] font-medium text-ink-dim">
               {count(balance?.lifetime_earned ?? 0)}
             </p>
           </div>
           <div>
-            <p className="text-[12px] tracking-[0.02em] text-text-faint">Lifetime spent</p>
-            <p className="tnum mt-1.5 text-[19px] font-medium text-text-dim">
+            <p className="text-[12px] tracking-[0.02em] text-ink-faint">Lifetime spent</p>
+            <p className="tnum mt-1.5 text-[19px] font-medium text-ink-dim">
               {count(balance?.lifetime_spent ?? 0)}
             </p>
           </div>
-          <p className="ml-auto max-w-[34ch] text-[12.5px] leading-relaxed text-text-faint">
+          <p className="ml-auto max-w-[34ch] text-[12.5px] leading-relaxed text-ink-faint">
             One coin for every ₹100 on a successful payment, capped at 100 per transaction.
             Refunds and failed payments earn nothing.
           </p>
         </div>
-      </Panel>
+      </Surface>
 
-      <Panel>
-        <PanelHeading title="Catalogue" hint="Six rewards. Better rates at higher tiers." />
+      <Surface>
+        <SurfaceHead title="Catalogue" hint="Six rewards. Better rates at higher tiers." />
         <RewardsPanel
           balance={balance}
           rewards={rewards}
@@ -95,10 +95,10 @@ export default function RewardsPage() {
           }}
           onRetry={refresh}
         />
-      </Panel>
+      </Surface>
 
-      <Panel>
-        <PanelHeading
+      <Surface>
+        <SurfaceHead
           title="Redemption history"
           hint="Every voucher you have claimed, newest first."
         />
@@ -106,7 +106,7 @@ export default function RewardsPage() {
         {historyLoading ? (
           <div className="space-y-0">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 border-b border-border py-4">
+              <div key={i} className="flex items-center gap-4 border-b border-[var(--line)] py-4">
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-3.5 w-40" />
                   <Skeleton className="h-3 w-28" />
@@ -126,30 +126,30 @@ export default function RewardsPage() {
             {history!.map((row) => (
               <li
                 key={row.id}
-                className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border py-4 last:border-b-0"
+                className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[var(--line)] py-4 last:border-b-0"
               >
-                <span className="grid size-9 shrink-0 place-items-center rounded-full border border-border text-text-faint">
+                <span className="grid size-9 shrink-0 place-items-center rounded-full border border-[var(--line)] text-ink-faint">
                   <Gift size={15} aria-hidden />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13.5px] font-medium text-text">
+                  <p className="truncate text-[13.5px] font-medium text-ink">
                     {row.title} {row.status === "REVERSED" && "(reversed)"}
                   </p>
-                  <p className="mt-0.5 text-[12px] text-text-faint">
+                  <p className="mt-0.5 text-[12px] text-ink-faint">
                     {longDateTime(row.created_at)} · worth {money(row.rupee_value)}
                   </p>
                 </div>
-                <code className="tnum rounded-[var(--r-control)] border border-border bg-surface-2 px-2.5 py-1.5 font-mono text-[12.5px] tracking-[0.06em] text-text">
+                <code className="tnum rounded-[var(--r-control)] border border-[var(--line)] bg-[var(--content-hover)] px-2.5 py-1.5 font-mono text-[12.5px] tracking-[0.06em] text-ink">
                   {row.voucher_code}
                 </code>
-                <span className="tnum shrink-0 text-[13px] text-text-dim">
+                <span className="tnum shrink-0 text-[13px] text-ink-dim">
                   {row.status === "REVERSED" ? "Returned" : `−${count(row.coin_cost)}`}
                 </span>
                 {row.status !== "REVERSED" && (
                   <button
                     type="button"
                     onClick={() => void reverse(row.id)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--r-control)] border border-border px-3 text-[12px] text-text-dim hover:border-border-strong hover:text-text"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--r-control)] border border-[var(--line)] px-3 text-[12px] text-ink-dim hover:border-[var(--line-strong)] hover:text-ink"
                   >
                     <RotateCcw size={13} aria-hidden />
                     Reverse
@@ -159,7 +159,7 @@ export default function RewardsPage() {
             ))}
           </ul>
         )}
-      </Panel>
+      </Surface>
     </div>
   );
 }

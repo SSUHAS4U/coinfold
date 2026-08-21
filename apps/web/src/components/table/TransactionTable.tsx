@@ -3,7 +3,7 @@
 import { AlertTriangle, ArrowDown, ArrowUp, Coins, Inbox, Search } from "lucide-react";
 import { memo, useCallback, type KeyboardEvent } from "react";
 
-import { EmptyState, ErrorState, Skeleton, StatusPill } from "@/components/ui/Primitives";
+import { EmptyState, ErrorState, Skeleton, StatusDot } from "@/components/ui/Primitives";
 import type { Transaction } from "@/lib/api";
 import { categoryColor, METHOD_LABEL, money, shortDate, timeOf } from "@/lib/format";
 
@@ -65,8 +65,8 @@ function SortHeader({
       onClick={onClick}
       className={[
         "group inline-flex h-11 min-h-11 items-center gap-1.5 text-[12px] tracking-[0.02em]",
-        "transition-colors duration-[var(--t-interaction)]",
-        active ? "text-text" : "text-text-faint hover:text-text-dim",
+        "transition-colors duration-[var(--t-hover)]",
+        active ? "text-ink" : "text-ink-faint hover:text-ink-dim",
         align === "right" ? "flex-row-reverse" : "",
       ].join(" ")}
     >
@@ -74,7 +74,7 @@ function SortHeader({
       <span
         aria-hidden
         className={[
-          "transition-opacity duration-[var(--t-interaction)]",
+          "transition-opacity duration-[var(--t-hover)]",
           active ? "opacity-100" : "opacity-0 group-hover:opacity-45",
         ].join(" ")}
       >
@@ -116,9 +116,9 @@ const Row = memo(function Row({
       onKeyDown={onKeyDown}
       aria-label={`${row.merchant}, ${money(row.amount)}, ${shortDate(row.occurred_at)}`}
       className={[
-        "group h-[var(--row-h)] cursor-pointer border-b border-border",
-        "transition-colors duration-[var(--t-interaction)] ease-[var(--ease)]",
-        "hover:bg-surface-2 focus-visible:bg-surface-2",
+        "group h-[var(--row-h)] cursor-pointer border-b border-[var(--line)]",
+        "transition-colors duration-[var(--t-hover)] ease-[var(--ease-out)]",
+        "hover:bg-[var(--content-hover)] focus-visible:bg-[var(--content-hover)]",
         // The focus ring is drawn inset so it is not clipped by the scroll
         // container at the first and last row.
         "outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent",
@@ -126,8 +126,8 @@ const Row = memo(function Row({
     >
       {/* Date — folds away below md; the time moves under the merchant. */}
       <td className="hidden whitespace-nowrap px-4 md:table-cell">
-        <div className="tnum text-[13px] text-text">{shortDate(row.occurred_at)}</div>
-        <div className="tnum mt-0.5 text-[12px] text-text-faint">{timeOf(row.occurred_at)}</div>
+        <div className="tnum text-[13px] text-ink">{shortDate(row.occurred_at)}</div>
+        <div className="tnum mt-0.5 text-[12px] text-ink-faint">{timeOf(row.occurred_at)}</div>
       </td>
 
       {/* Merchant + category. The primary cell, and the last one to give ground. */}
@@ -140,16 +140,16 @@ const Row = memo(function Row({
           />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="truncate text-[14px] font-medium text-text">{row.merchant}</span>
+              <span className="truncate text-[14px] font-medium text-ink">{row.merchant}</span>
               {row.is_anomalous && (
                 <AlertTriangle
                   size={13}
-                  className="shrink-0 text-warning"
+                  className="shrink-0 text-[var(--hold)]"
                   aria-label="Flagged during import"
                 />
               )}
             </div>
-            <div className="mt-0.5 truncate text-[12px] text-text-faint">
+            <div className="mt-0.5 truncate text-[12px] text-ink-faint">
               {row.category_label}
               <span className="md:hidden"> · {shortDate(row.occurred_at)}</span>
             </div>
@@ -158,13 +158,13 @@ const Row = memo(function Row({
       </td>
 
       {/* Method — the first column to go. */}
-      <td className="hidden whitespace-nowrap px-4 text-[13px] text-text-dim lg:table-cell">
+      <td className="hidden whitespace-nowrap px-4 text-[13px] text-ink-dim lg:table-cell">
         {METHOD_LABEL[row.method] ?? row.method}
       </td>
 
       {/* Status — folds under the amount on phones. */}
       <td className="hidden whitespace-nowrap px-4 sm:table-cell">
-        <StatusPill status={row.status} />
+        <StatusDot status={row.status} />
       </td>
 
       {/* Amount + coins. Right-aligned, tabular, and the only place a figure
@@ -173,13 +173,13 @@ const Row = memo(function Row({
       <td className="px-4 text-right">
         <div
           className="tnum whitespace-nowrap text-[14px] font-medium"
-          style={{ color: isRefund ? "var(--success)" : "var(--text)" }}
+          style={{ color: isRefund ? "var(--up)" : "var(--ink)" }}
         >
           {money(row.amount)}
         </div>
-        <div className="mt-0.5 flex items-center justify-end gap-1 text-[12px] text-text-faint">
+        <div className="mt-0.5 flex items-center justify-end gap-1 text-[12px] text-ink-faint">
           <span className="sm:hidden">
-            <StatusPill status={row.status} />
+            <StatusDot status={row.status} />
           </span>
           {isRefund ? (
             <span className="hidden sm:inline">refund</span>
@@ -230,7 +230,7 @@ export function TransactionTable({
       <div className="px-4 py-2" aria-busy="true" aria-live="polite">
         <span className="sr-only">Loading transactions</span>
         {Array.from({ length: Math.min(pageSize, 12) }).map((_, i) => (
-          <div key={i} className="flex h-[var(--row-h)] items-center gap-3 border-b border-border">
+          <div key={i} className="flex h-[var(--row-h)] items-center gap-3 border-b border-[var(--line)]">
             <Skeleton className="size-1.5 rounded-full" />
             <div className="flex-1 space-y-2">
               <Skeleton className="h-3.5 w-40" />
@@ -257,7 +257,7 @@ export function TransactionTable({
             <button
               type="button"
               onClick={onClearFilters}
-              className="h-9 min-h-9 rounded-[var(--r-control)] border border-border px-4 text-[13px] text-text transition-colors hover:border-border-strong hover:bg-surface-2"
+              className="h-9 min-h-9 rounded-[var(--r-control)] border border-[var(--line)] px-4 text-[13px] text-ink transition-colors hover:border-[var(--line-strong)] hover:bg-[var(--content-hover)]"
             >
               Clear all filters
             </button>
@@ -283,12 +283,12 @@ export function TransactionTable({
     >
       <table
         className={[
-          "w-full border-collapse text-left transition-opacity duration-[var(--t-state)]",
+          "w-full border-collapse text-left transition-opacity duration-[var(--t-move)]",
           loading ? "opacity-55" : "opacity-100",
         ].join(" ")}
       >
-        <thead className="sticky top-0 z-10 bg-bg">
-          <tr className="border-b border-border">
+        <thead className="sticky top-0 z-10 bg-[var(--canvas)]">
+          <tr className="border-b border-[var(--line)]">
             {/* aria-sort is what tells a screen reader the table is sorted and
                 which way. Without it the arrow glyph is visual-only. */}
             <th
@@ -307,19 +307,19 @@ export function TransactionTable({
             </th>
             <th
               scope="col"
-              className="px-4 text-[12px] font-normal tracking-[0.02em] text-text-faint"
+              className="px-4 text-[12px] font-normal tracking-[0.02em] text-ink-faint"
             >
               Merchant
             </th>
             <th
               scope="col"
-              className="hidden px-4 text-[12px] font-normal tracking-[0.02em] text-text-faint lg:table-cell"
+              className="hidden px-4 text-[12px] font-normal tracking-[0.02em] text-ink-faint lg:table-cell"
             >
               Method
             </th>
             <th
               scope="col"
-              className="hidden px-4 text-[12px] font-normal tracking-[0.02em] text-text-faint sm:table-cell"
+              className="hidden px-4 text-[12px] font-normal tracking-[0.02em] text-ink-faint sm:table-cell"
             >
               Status
             </th>

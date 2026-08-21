@@ -1,165 +1,312 @@
 @import "tailwindcss";
 
-/* Dark is the designed default, so the variant is class-driven rather than
-   prefers-color-scheme: the app sets .light explicitly and dark is the base. */
-@custom-variant light (&:where(.light, .light *));
+/* Light is the designed default now, so the variant is the dark one. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* ---------------------------------------------------------------------------
-   Tokens. Every value in docs/UI_SPEC.md, and the only place a raw colour is
-   allowed to appear. A component reaching for a hex means the token set is
-   wrong — fix the token set.
-   --------------------------------------------------------------------------- */
+/* ============================================================================
+   COINFOLD SPATIAL FINANCE
+   ----------------------------------------------------------------------------
+   A three-layer material system. The layer decides the treatment; nothing is
+   glass because glass looks nice.
+
+     CANVAS    the room. Flat, no shadow, no blur. Never a card.
+     CONTENT   objects resting on the canvas. Near-opaque, soft diffuse
+               shadow, 24px radius. The bulk of the interface.
+     FLOATING  things that hover ABOVE the interface — nav, inspector, action
+               sheet, tooltips, command palette. ONLY these get backdrop-blur.
+
+   If everything blurs, blur stops meaning "this is above you", and the whole
+   hierarchy collapses into decoration. Apple's material guidance is explicit
+   about this and it is the single easiest way to look generated.
+   ========================================================================== */
 
 :root {
-  /* Surfaces */
-  --bg: #08090a;
-  --surface-1: #0e1012;
-  --surface-2: #15181c;
-  --surface-3: #1d2126;
-  --border: #22262c;
-  --border-strong: #31363e;
+  /* --- Canvas ------------------------------------------------------------ */
+  --canvas: #f7f5f2;
+  --canvas-sunk: #eeeae4; /* wells: table body, inset areas */
 
-  /* Ink — a three-step ladder and nothing more (Linear) */
-  --text: #f2f4f7;
-  --text-dim: #98a0ae;
-  --text-faint: #666e7c;
+  /* --- Content ----------------------------------------------------------- */
+  --content: #ffffff;
+  --content-hover: #fbf9f6;
+  --content-active: #f3f0eb;
 
-  /* The single accent. Brand + CTA + coins. NEVER a data colour (Groww). */
-  --accent: #5be9b9;
-  --accent-quiet: #1c3b34;
-  --on-accent: #04120e;
+  /* --- Floating (the only blurred layer) --------------------------------- */
+  --floating: rgb(255 255 255 / 0.72);
+  --floating-strong: rgb(255 255 255 / 0.86);
+  --floating-blur: 24px;
 
-  /* Semantic. Used only for payment status, never for emphasis. */
-  --success: #3dd68c;
-  --warning: #f5b544;
-  --danger: #f0654e;
+  /* --- Hairlines --------------------------------------------------------- */
+  --line: rgb(0 0 0 / 0.07);
+  --line-strong: rgb(0 0 0 / 0.13);
 
-  /* Category tint: hue is supplied per-category from the database, so a
-     category keeps one identity across every chart, chip and row. */
-  --cat-l: 72%;
-  --cat-c: 0.13;
+  /* --- Ink --------------------------------------------------------------- */
+  --ink: #16161d;
+  --ink-dim: #62636b;
+  --ink-faint: #9698a1;
 
-  /* Radius */
-  --r-card: 14px;
-  --r-control: 9px;
+  /* --- The one signature accent: electric blue → violet ------------------ */
+  --accent: #4f5bff;
+  --accent-2: #8b5cf6;
+  --accent-soft: rgb(79 91 255 / 0.1);
+  --accent-line: rgb(79 91 255 / 0.28);
+  --on-accent: #ffffff;
+  --accent-gradient: linear-gradient(135deg, #4f5bff 0%, #8b5cf6 100%);
+
+  /* --- Rewards are gold. Never the accent; they are a different meaning. -- */
+  --gold: #c98a1b;
+  --gold-bright: #e8a33d;
+  --gold-soft: rgb(232 163 61 / 0.13);
+
+  /* --- Semantic. Payment state only, never emphasis. --------------------- */
+  --up: #0a8a4f; /* successful payment */
+  --down: #c8341f; /* failed / problem */
+  --hold: #9a6400; /* pending */
+
+  /* --- Category tint. Hue comes from the database per category. ---------- */
+  --cat-l: 52%;
+  --cat-c: 0.16;
+
+  /* --- Radius: iOS widget scale ------------------------------------------ */
+  --r-card: 24px;
+  --r-inner: 16px;
+  --r-control: 12px;
   --r-pill: 999px;
 
-  /* Elevation. The inset highlight is what stops a raised dark surface
-     reading as a flat grey rectangle. */
-  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.3);
-  --shadow-2: 0 12px 32px rgb(0 0 0 / 0.45);
-  --highlight: inset 0 1px 0 rgb(255 255 255 / 0.04);
+  /* --- Shadow: large, soft, diffuse. Never a hard 1px drop. -------------- */
+  --shadow-rest:
+    0 1px 2px rgb(16 18 32 / 0.04), 0 4px 12px rgb(16 18 32 / 0.04);
+  --shadow-lift:
+    0 2px 4px rgb(16 18 32 / 0.05), 0 12px 28px rgb(16 18 32 / 0.09);
+  --shadow-float:
+    0 8px 16px rgb(16 18 32 / 0.08), 0 32px 64px rgb(16 18 32 / 0.16);
+  --hairline-top: inset 0 1px 0 rgb(255 255 255 / 0.6);
 
-  /* Motion — one easing curve for the whole product */
-  --ease: cubic-bezier(0.2, 0, 0, 1);
-  --t-interaction: 160ms;
-  --t-state: 200ms;
-  --t-value: 300ms;
+  /* --- Motion ------------------------------------------------------------ */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --t-tap: 120ms;
+  --t-hover: 180ms;
+  --t-move: 260ms;
+  --t-enter: 380ms;
 
-  /* Density */
-  --row-h: 64px;
+  /* ---------------------------------------------------------------------
+     Type over photography. Four layers, per the design skill: a global base
+     scrim, a per-band scrim that deepens with the band's own progress, a
+     three-layer text shadow, and a chip backing for small labels. A single
+     flat overlay is what makes photographic heroes look cheap — it kills the
+     picture without ever making the words safe.
+     ------------------------------------------------------------------- */
+  --scrim-base: radial-gradient(
+    ellipse 120% 90% at 50% 45%,
+    rgb(10 8 6 / 0) 35%,
+    rgb(10 8 6 / 0.62) 100%
+  );
+  --scrim-band: radial-gradient(
+    ellipse 76% 64% at 50% 50%,
+    rgb(8 6 5 / 0.68) 0%,
+    rgb(8 6 5 / 0.46) 46%,
+    rgb(8 6 5 / 0) 76%
+  );
+  --tshadow:
+    0 1px 2px rgb(8 6 5 / 0.95), 0 3px 12px rgb(8 6 5 / 0.78),
+    0 10px 44px rgb(8 6 5 / 0.8);
 
-  color-scheme: dark;
-}
+  /* Mono only where columns must align — never for a single hero figure. */
+  --font-mono-stack: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
 
-.light {
-  --bg: #fcfcfd;
-  --surface-1: #ffffff;
-  --surface-2: #f7f8fa;
-  --surface-3: #eef0f3;
-  --border: #e4e7ec;
-  --border-strong: #cfd4dc;
-
-  --text: #12141a;
-  --text-dim: #5a6474;
-  --text-faint: #8a93a3;
-
-  /* Darkened so it still holds 4.5:1 against a light field, and the ink on it
-     flips to white. The dark accent would fail contrast here. */
-  --accent: #0e9e77;
-  --accent-quiet: #dff5ed;
-  --on-accent: #ffffff;
-
-  --success: #0b8a50;
-  --warning: #9a6206;
-  --danger: #c33a22;
-
-  --cat-l: 48%;
-  --cat-c: 0.14;
-
-  --shadow-1: 0 1px 2px rgb(16 24 40 / 0.06);
-  --shadow-2: 0 12px 32px rgb(16 24 40 / 0.12);
-  --highlight: inset 0 1px 0 rgb(255 255 255 / 0.9);
+  --row-h: 60px;
 
   color-scheme: light;
 }
 
-/* Expose the tokens to Tailwind so `bg-surface-1` and friends exist. */
+/* ============================================================================
+   DARK — a designed graphite environment, not an inversion.
+   Surfaces get LIGHTER as they rise (the opposite of the light theme, where
+   they get whiter but also gain shadow). Ink never reaches pure white.
+   ========================================================================== */
+
+.dark {
+  --canvas: #0e0c0a;
+  --canvas-sunk: #0a0908;
+
+  --content: #191614;
+  --content-hover: #1c1c24;
+  --content-active: #22222b;
+
+  --floating: rgb(30 30 38 / 0.72);
+  --floating-strong: rgb(30 30 38 / 0.9);
+
+  --line: rgb(255 255 255 / 0.08);
+  --line-strong: rgb(255 255 255 / 0.16);
+
+  --ink: #f2f2f5;
+  --ink-dim: #a0a1ad;
+  --ink-faint: #6e6f7b;
+
+  /* Lifted and desaturated slightly: the light-theme blue is muddy on black. */
+  --accent: #7b85ff;
+  --accent-2: #a78bfa;
+  --accent-soft: rgb(123 133 255 / 0.16);
+  --accent-line: rgb(123 133 255 / 0.36);
+  --on-accent: #0b0b12;
+  --accent-gradient: linear-gradient(135deg, #7b85ff 0%, #a78bfa 100%);
+
+  --gold: #e8a33d;
+  --gold-bright: #f5c169;
+  --gold-soft: rgb(232 163 61 / 0.16);
+
+  --up: #3ddc8c;
+  --down: #ff7a66;
+  --hold: #f5b544;
+
+  --cat-l: 72%;
+  --cat-c: 0.14;
+
+  --shadow-rest: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-lift: 0 2px 6px rgb(0 0 0 / 0.4), 0 16px 32px rgb(0 0 0 / 0.36);
+  --shadow-float: 0 12px 24px rgb(0 0 0 / 0.44), 0 40px 80px rgb(0 0 0 / 0.56);
+  --hairline-top: inset 0 1px 0 rgb(255 255 255 / 0.06);
+
+  color-scheme: dark;
+}
+
 @theme inline {
-  --color-bg: var(--bg);
-  --color-surface-1: var(--surface-1);
-  --color-surface-2: var(--surface-2);
-  --color-surface-3: var(--surface-3);
-  --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-  --color-text: var(--text);
-  --color-text-dim: var(--text-dim);
-  --color-text-faint: var(--text-faint);
+  --color-canvas: var(--canvas);
+  --color-canvas-sunk: var(--canvas-sunk);
+  --color-content: var(--content);
+  --color-content-hover: var(--content-hover);
+  --color-content-active: var(--content-active);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
+  --color-ink-faint: var(--ink-faint);
   --color-accent: var(--accent);
-  --color-accent-quiet: var(--accent-quiet);
+  --color-accent-2: var(--accent-2);
+  --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-danger: var(--danger);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-hold: var(--hold);
 
   --radius-card: var(--r-card);
+  --radius-inner: var(--r-inner);
   --radius-control: var(--r-control);
   --radius-pill: var(--r-pill);
 
-  --ease-brand: var(--ease);
-
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono-stack);
 }
 
-/* ---------------------------------------------------------------------------
+/* ============================================================================
    Base
-   --------------------------------------------------------------------------- */
+   ========================================================================== */
 
 * {
-  border-color: var(--border);
+  border-color: var(--line);
 }
 
 html {
-  /* The landing's scroll story is driven by scroll position; smooth scrolling
-     fights it by desynchronising wheel events from the animation frame. */
+  /* The scroll story reads scroll position every frame; smooth-scroll
+     desynchronises wheel events from the animation frame and makes it lurch. */
   scroll-behavior: auto;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  /* Belt and braces against the single most common layout defect. The test
-     suite asserts it too, but this stops it ever reaching a screenshot. */
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
-/* Every figure that can change or that sits in a column. Without tabular
-   figures a counting number visibly jitters as its glyph widths change. */
+/* Every figure that can change, and every figure in a column. Without tabular
+   numerals a counting number visibly jitters as glyph widths change. */
 .tnum {
   font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum";
+  font-feature-settings: "tnum", "cv01", "cv03";
 }
 
-/* ---------------------------------------------------------------------------
-   Focus. Visible, consistent, and never removed — keyboard users are graded
-   here too.
-   --------------------------------------------------------------------------- */
+/* Financial figures get their own treatment: tight, confident, never bold. */
+.figure {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+/* The display voice. Serif, tight, never bold — the contrast in the face is
+   doing the work, so weight would only muddy it. */
+.display {
+  font-family: var(--font-display), Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 0.98;
+}
+
+/* Layer 3 of the legibility system. Off on buttons, where a shadowed label
+   reads as grime rather than as depth. */
+.over-photo {
+  text-shadow: var(--tshadow);
+}
+.over-photo button,
+.over-photo .btn {
+  text-shadow: none;
+}
+
+/* Layer 4: a blurred backing pill for small labels over photography, which
+   the big radial scrim would have to be far too dark to rescue. */
+.chip-scrim {
+  background: rgb(10 8 6 / 0.42);
+  border: 1px solid rgb(255 255 255 / 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  text-shadow: 0 1px 3px rgb(8 6 5 / 0.85);
+}
+
+/* ============================================================================
+   Material utilities
+   ========================================================================== */
+
+.mat-content {
+  background: var(--content);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-rest);
+}
+
+/* The ONLY blurred layer. Anything using this genuinely floats above the UI. */
+.mat-floating {
+  background: var(--floating);
+  backdrop-filter: blur(var(--floating-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--floating-blur)) saturate(180%);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-float), var(--hairline-top);
+}
+
+.mat-floating-strong {
+  background: var(--floating-strong);
+  backdrop-filter: blur(var(--floating-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--floating-blur)) saturate(180%);
+}
+
+/* A gradient applied to text, for the one or two places it earns its keep. */
+.ink-accent {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ============================================================================
+   Focus — visible, consistent, never removed.
+   ========================================================================== */
 
 :focus-visible {
   outline: 2px solid var(--accent);
@@ -167,19 +314,17 @@ body {
   border-radius: var(--r-control);
 }
 
-/* Only suppress the ring for pointer users, never for keyboard. */
 :focus:not(:focus-visible) {
   outline: none;
 }
 
-/* ---------------------------------------------------------------------------
-   Scrollbars — the table scrolls inside its own container, so its bar is
-   visible chrome rather than an afterthought.
-   --------------------------------------------------------------------------- */
+/* ============================================================================
+   Scroll areas
+   ========================================================================== */
 
 .scroll-area {
   scrollbar-width: thin;
-  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-color: var(--line-strong) transparent;
 }
 .scroll-area::-webkit-scrollbar {
   width: 10px;
@@ -189,17 +334,15 @@ body {
   background: transparent;
 }
 .scroll-area::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
+  background: var(--line-strong);
   border-radius: var(--r-pill);
-  border: 3px solid var(--bg);
-}
-.scroll-area::-webkit-scrollbar-thumb:hover {
-  background: var(--text-faint);
+  border: 3px solid transparent;
+  background-clip: content-box;
 }
 
-/* ---------------------------------------------------------------------------
-   Motion primitives
-   --------------------------------------------------------------------------- */
+/* ============================================================================
+   Loading
+   ========================================================================== */
 
 @keyframes shimmer {
   100% {
@@ -210,7 +353,7 @@ body {
 .skeleton {
   position: relative;
   overflow: hidden;
-  background: var(--surface-2);
+  background: var(--canvas-sunk);
   border-radius: var(--r-control);
 }
 .skeleton::after {
@@ -221,28 +364,17 @@ body {
   background: linear-gradient(
     90deg,
     transparent,
-    color-mix(in oklab, var(--text) 6%, transparent),
+    color-mix(in oklab, var(--ink) 5%, transparent),
     transparent
   );
-  animation: shimmer 1.4s var(--ease) infinite;
+  animation: shimmer 1.5s var(--ease-out) infinite;
 }
 
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
+/* ============================================================================
+   Reduced motion — DISABLED, not reduced. Someone who asked for stillness
+   gets stillness.
+   ========================================================================== */
 
-.rise {
-  animation: rise var(--t-state) var(--ease) both;
-}
-
-/* Disabled, not reduced. A user who asked for no motion gets no motion. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

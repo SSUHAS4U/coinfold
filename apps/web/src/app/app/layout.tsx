@@ -66,7 +66,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   if (hasSession !== true) {
     return (
       <main className="grid min-h-dvh place-items-center">
-        <p className="text-[13px] text-text-faint">
+        <p className="text-[13px] text-ink-faint">
           {hasSession === undefined ? "Checking your session…" : "Redirecting to sign in…"}
         </p>
       </main>

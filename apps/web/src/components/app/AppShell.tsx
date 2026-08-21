@@ -16,7 +16,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { CoinHud } from "@/components/dashboard/CoinHud";
-import { Logo } from "@/components/landing/Atmosphere";
+import { Mark } from "@/components/brand/Mark";
 import { notifySession, setTheme, useTheme } from "@/hooks/useBrowserState";
 import { tokens } from "@/lib/api";
 
@@ -57,7 +57,7 @@ function ThemeToggle() {
       type="button"
       onClick={() => setTheme(light ? "dark" : "light")}
       aria-label={light ? "Switch to dark theme" : "Switch to light theme"}
-      className="grid size-11 min-h-11 place-items-center rounded-[var(--r-control)] border border-border text-text-dim transition-colors duration-[var(--t-interaction)] hover:border-border-strong hover:text-text"
+      className="grid size-11 min-h-11 place-items-center rounded-[var(--r-control)] border border-[var(--line)] text-ink-dim transition-colors duration-[var(--t-hover)] hover:border-[var(--line-strong)] hover:text-ink"
     >
       {light ? <Moon size={16} aria-hidden /> : <Sun size={16} aria-hidden />}
     </button>
@@ -84,10 +84,10 @@ function NavList({
             aria-current={active ? "page" : undefined}
             className={[
               "flex h-11 min-h-11 items-center gap-3 rounded-[var(--r-control)] px-3",
-              "text-[13.5px] transition-colors duration-[var(--t-interaction)]",
+              "text-[13.5px] transition-colors duration-[var(--t-hover)]",
               active
-                ? "bg-surface-3 font-medium text-text"
-                : "text-text-dim hover:bg-surface-2 hover:text-text",
+                ? "bg-[var(--content-active)] font-medium text-ink"
+                : "text-ink-dim hover:bg-[var(--content-hover)] hover:text-ink",
             ].join(" ")}
           >
             {/* The active marker is a bar, not only a colour: colour alone is
@@ -144,10 +144,10 @@ export function AppShell({
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
       {/* ---- Sidebar, permanent from lg up ---------------------------- */}
-      <aside className="hidden border-r border-border bg-surface-1 lg:flex lg:h-dvh lg:flex-col lg:sticky lg:top-0">
-        <div className="flex h-[73px] items-center border-b border-border px-5">
-          <Link href="/app" className="inline-flex items-center gap-2.5 text-text">
-            <Logo size={19} />
+      <aside className="hidden border-r border-[var(--line)] bg-[var(--content)] lg:flex lg:h-dvh lg:flex-col lg:sticky lg:top-0">
+        <div className="flex h-[73px] items-center border-b border-[var(--line)] px-5">
+          <Link href="/app" className="inline-flex items-center gap-2.5 text-ink">
+            <Mark size={19} />
             <span className="text-[13px] font-medium uppercase tracking-[0.16em]">Coinfold</span>
           </Link>
         </div>
@@ -156,11 +156,11 @@ export function AppShell({
           <NavList pathname={pathname} />
         </div>
 
-        <div className="border-t border-border p-3">
+        <div className="border-t border-[var(--line)] p-3">
           <button
             type="button"
             onClick={signOut}
-            className="flex h-11 min-h-11 w-full items-center gap-3 rounded-[var(--r-control)] px-3 text-[13.5px] text-text-dim transition-colors hover:bg-surface-2 hover:text-text"
+            className="flex h-11 min-h-11 w-full items-center gap-3 rounded-[var(--r-control)] px-3 text-[13.5px] text-ink-dim transition-colors hover:bg-[var(--content-hover)] hover:text-ink"
           >
             <span aria-hidden className="w-[2px] shrink-0" />
             <LogOut size={16} aria-hidden className="shrink-0" />
@@ -181,11 +181,11 @@ export function AppShell({
             role="dialog"
             aria-modal="true"
             aria-label="Navigation"
-            className="relative flex h-full w-[264px] flex-col border-r border-border bg-surface-1"
+            className="relative flex h-full w-[264px] flex-col border-r border-[var(--line)] bg-[var(--content)]"
           >
-            <div className="flex h-[73px] items-center justify-between border-b border-border px-5">
-              <span className="inline-flex items-center gap-2.5 text-text">
-                <Logo size={19} />
+            <div className="flex h-[73px] items-center justify-between border-b border-[var(--line)] px-5">
+              <span className="inline-flex items-center gap-2.5 text-ink">
+                <Mark size={19} />
                 <span className="text-[13px] font-medium uppercase tracking-[0.16em]">
                   Coinfold
                 </span>
@@ -194,7 +194,7 @@ export function AppShell({
                 type="button"
                 onClick={() => setDrawerOpen(false)}
                 aria-label="Close navigation"
-                className="grid size-11 min-h-11 place-items-center rounded-[var(--r-control)] text-text-faint hover:bg-surface-2 hover:text-text"
+                className="grid size-11 min-h-11 place-items-center rounded-[var(--r-control)] text-ink-faint hover:bg-[var(--content-hover)] hover:text-ink"
               >
                 <X size={18} aria-hidden />
               </button>
@@ -204,11 +204,11 @@ export function AppShell({
               <NavList pathname={pathname} onNavigate={() => setDrawerOpen(false)} />
             </div>
 
-            <div className="border-t border-border p-3">
+            <div className="border-t border-[var(--line)] p-3">
               <button
                 type="button"
                 onClick={signOut}
-                className="flex h-11 min-h-11 w-full items-center gap-3 rounded-[var(--r-control)] px-3 text-[13.5px] text-text-dim hover:bg-surface-2 hover:text-text"
+                className="flex h-11 min-h-11 w-full items-center gap-3 rounded-[var(--r-control)] px-3 text-[13.5px] text-ink-dim hover:bg-[var(--content-hover)] hover:text-ink"
               >
                 <span aria-hidden className="w-[2px] shrink-0" />
                 <LogOut size={16} aria-hidden />
@@ -221,22 +221,22 @@ export function AppShell({
 
       {/* ---- Main column ---------------------------------------------- */}
       <div className="min-w-0">
-        <header className="sticky top-0 z-30 border-b border-border bg-bg/85 backdrop-blur-md">
+        <header className="sticky top-0 z-30 border-b border-[var(--line)] bg-[var(--floating-strong)] backdrop-blur-md">
           <div className="flex min-h-[73px] flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
             <button
               type="button"
               onClick={() => setDrawerOpen(true)}
               aria-label="Open navigation"
-              className="grid size-11 min-h-11 shrink-0 place-items-center rounded-[var(--r-control)] border border-border text-text-dim transition-colors hover:border-border-strong hover:text-text lg:hidden"
+              className="grid size-11 min-h-11 shrink-0 place-items-center rounded-[var(--r-control)] border border-[var(--line)] text-ink-dim transition-colors hover:border-[var(--line-strong)] hover:text-ink lg:hidden"
             >
               <Menu size={17} aria-hidden />
             </button>
 
             <div className="mr-auto min-w-0">
-              <h1 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-text">
+              <h1 className="truncate text-[17px] font-semibold tracking-[-0.01em] text-ink">
                 {title}
               </h1>
-              <p className="truncate text-[12.5px] text-text-faint">{subtitle}</p>
+              <p className="truncate text-[12.5px] text-ink-faint">{subtitle}</p>
             </div>
 
             <CoinHud

@@ -4,7 +4,7 @@ import { StatRow } from "@/components/app/StatRow";
 import { useDashboardContext } from "@/components/app/DashboardContext";
 import { CategoryDonut, MonthlyTrend } from "@/components/charts/SpendCharts";
 import { FilterBar } from "@/components/dashboard/FilterBar";
-import { Panel, PanelHeading } from "@/components/ui/Primitives";
+import { Surface, SurfaceHead } from "@/components/ui/Primitives";
 
 /**
  * Analytics: both charts, full width, under the same filters as everything else.
@@ -37,7 +37,7 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <Panel>
+      <Surface>
         <FilterBar
           query={query}
           facets={facets}
@@ -47,9 +47,9 @@ export default function AnalyticsPage() {
           onSet={(patch) => dispatch({ type: "set", patch })}
           onReset={() => dispatch({ type: "reset" })}
         />
-      </Panel>
+      </Surface>
 
-      <Panel>
+      <Surface>
         <StatRow
           spend={summary.data?.total_spend ?? "0"}
           refunded={summary.data?.total_refunded ?? "0"}
@@ -59,10 +59,10 @@ export default function AnalyticsPage() {
           coins={summary.data?.coins_earned ?? 0}
           loading={summary.loading && !summary.data}
         />
-      </Panel>
+      </Surface>
 
-      <Panel>
-        <PanelHeading
+      <Surface>
+        <SurfaceHead
           title="Month by month"
           hint="Click a month to filter every screen to it. Empty months are drawn as zero, not skipped."
         />
@@ -72,10 +72,10 @@ export default function AnalyticsPage() {
           onSelectMonth={onMonthSelect}
           selectedMonth={selectedMonth}
         />
-      </Panel>
+      </Surface>
 
-      <Panel>
-        <PanelHeading
+      <Surface>
+        <SurfaceHead
           title="Where it went"
           hint="Successful, positive payments only — a failed payment moved no money, and a refund is not spending."
         />
@@ -85,7 +85,7 @@ export default function AnalyticsPage() {
           selected={query.categories}
           onSelect={(slug) => dispatch({ type: "toggle", key: "categories", value: slug })}
         />
-      </Panel>
+      </Surface>
     </div>
   );
 }

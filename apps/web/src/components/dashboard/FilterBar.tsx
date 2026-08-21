@@ -3,7 +3,7 @@
 import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
 import { useId, useState } from "react";
 
-import { Chip } from "@/components/ui/Primitives";
+import { FilterToken } from "@/components/ui/Primitives";
 import type { Facets } from "@/lib/api";
 import { METHOD_LABEL, STATUS_LABEL, count } from "@/lib/format";
 import type { Query } from "@/hooks/useDashboard";
@@ -36,16 +36,16 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[12px] tracking-[0.02em] text-text-faint">{label}</span>
+      <span className="mb-1.5 block text-[12px] tracking-[0.02em] text-ink-faint">{label}</span>
       {children}
     </label>
   );
 }
 
 const inputClass =
-  "h-11 min-h-11 w-full rounded-[var(--r-control)] border border-border bg-surface-1 px-3 " +
-  "text-[13px] text-text placeholder:text-text-faint transition-colors " +
-  "duration-[var(--t-interaction)] hover:border-border-strong focus:border-accent " +
+  "h-11 min-h-11 w-full rounded-[var(--r-control)] border border-[var(--line)] bg-[var(--content)] px-3 " +
+  "text-[13px] text-ink placeholder:text-ink-faint transition-colors " +
+  "duration-[var(--t-hover)] hover:border-[var(--line-strong)] focus:border-accent " +
   "focus:outline-none";
 
 export function FilterBar({
@@ -112,7 +112,7 @@ export function FilterBar({
           <Search
             size={15}
             aria-hidden
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-faint"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint"
           />
           <input
             id={searchId}
@@ -129,19 +129,19 @@ export function FilterBar({
           type="button"
           onClick={() => setAdvancedOpen((open) => !open)}
           aria-expanded={advancedOpen}
-          className="inline-flex h-11 min-h-11 items-center gap-2 rounded-[var(--r-control)] border border-border px-3.5 text-[13px] text-text-dim transition-colors hover:border-border-strong hover:text-text"
+          className="inline-flex h-11 min-h-11 items-center gap-2 rounded-[var(--r-control)] border border-[var(--line)] px-3.5 text-[13px] text-ink-dim transition-colors hover:border-[var(--line-strong)] hover:text-ink"
         >
           <SlidersHorizontal size={14} aria-hidden />
           Filters
           <ChevronDown
             size={14}
             aria-hidden
-            className="transition-transform duration-[var(--t-interaction)]"
+            className="transition-transform duration-[var(--t-hover)]"
             style={{ transform: advancedOpen ? "rotate(180deg)" : "none" }}
           />
         </button>
 
-        <p className="tnum ml-auto shrink-0 text-[13px] text-text-faint">
+        <p className="tnum ml-auto shrink-0 text-[13px] text-ink-faint">
           {count(matched)} {matched === 1 ? "transaction" : "transactions"}
         </p>
       </div>
@@ -150,7 +150,7 @@ export function FilterBar({
       {facets && facets.categories.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {facets.categories.map((category) => (
-            <Chip
+            <FilterToken
               key={category.slug}
               label={category.label}
               hue={category.accent_hue}
@@ -163,11 +163,11 @@ export function FilterBar({
       )}
 
       {advancedOpen && (
-        <div className="rise grid gap-4 rounded-[var(--r-card)] border border-border bg-surface-1 p-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rise grid gap-4 rounded-[var(--r-card)] border border-[var(--line)] bg-[var(--content)] p-4 sm:grid-cols-2 lg:grid-cols-4">
           <Field label="Status">
             <div className="flex flex-wrap gap-2">
               {(facets?.statuses ?? []).map((status) => (
-                <Chip
+                <FilterToken
                   key={status}
                   label={STATUS_LABEL[status] ?? status}
                   active={query.statuses.includes(status)}
@@ -180,7 +180,7 @@ export function FilterBar({
           <Field label="Payment method">
             <div className="flex flex-wrap gap-2">
               {(facets?.methods ?? []).map((method) => (
-                <Chip
+                <FilterToken
                   key={method}
                   label={METHOD_LABEL[method] ?? method}
                   active={query.methods.includes(method)}
@@ -242,7 +242,7 @@ export function FilterBar({
                 onChange={(event) => onSet({ includeAnomalous: !event.target.checked })}
                 className="size-4 accent-[var(--accent)]"
               />
-              <span className="text-[12px] text-text-dim">Hide rows flagged at import</span>
+              <span className="text-[12px] text-ink-dim">Hide rows flagged at import</span>
             </label>
           </div>
         </div>
@@ -251,12 +251,12 @@ export function FilterBar({
       {activeChips.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           {activeChips.map((chip) => (
-            <Chip key={chip.key} label={chip.label} active onRemove={chip.clear} />
+            <FilterToken key={chip.key} label={chip.label} active onRemove={chip.clear} />
           ))}
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex h-9 min-h-9 items-center gap-1.5 px-2 text-[13px] text-text-faint underline-offset-4 transition-colors hover:text-text hover:underline"
+            className="inline-flex h-9 min-h-9 items-center gap-1.5 px-2 text-[13px] text-ink-faint underline-offset-4 transition-colors hover:text-ink hover:underline"
           >
             <X size={13} aria-hidden />
             Clear all

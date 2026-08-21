@@ -33,8 +33,8 @@ export function StatRow({
   loading: boolean;
   onDark?: boolean;
 }) {
-  const ink = onDark ? "#F2F4F7" : "var(--text)";
-  const inkDim = onDark ? "rgb(242 244 247 / 0.62)" : "var(--text-faint)";
+  const ink = onDark ? "#F2F4F7" : "var(--ink)";
+  const inkDim = onDark ? "rgb(242 244 247 / 0.62)" : "var(--ink-faint)";
 
   const stats: { label: string; value: string; compact?: string; tone?: string }[] = [
     { label: "Total spent", value: money(spend), compact: moneyCompact(spend) },
@@ -43,18 +43,18 @@ export function StatRow({
       // "Refunded −₹10.3L" reads as money lost, which is backwards.
       label: "Refunded",
       value: moneyCompact(Math.abs(Number(refunded) || 0)),
-      tone: onDark ? "#3DD68C" : "var(--success)",
+      tone: onDark ? "#3DD68C" : "var(--up)",
     },
     { label: "Transactions", value: count(matched) },
     {
       label: "Failed",
       value: count(failed),
-      tone: failed > 0 ? (onDark ? "#F0654E" : "var(--danger)") : undefined,
+      tone: failed > 0 ? (onDark ? "#F0654E" : "var(--down)") : undefined,
     },
     {
       label: "Pending",
       value: count(pending),
-      tone: pending > 0 ? (onDark ? "#F5B544" : "var(--warning)") : undefined,
+      tone: pending > 0 ? (onDark ? "#F5B544" : "var(--hold)") : undefined,
     },
     { label: "Coins earned", value: count(coins), tone: onDark ? "#5BE9B9" : "var(--accent)" },
   ];
@@ -67,7 +67,7 @@ export function StatRow({
           className={index > 0 ? "lg:border-l lg:pl-6" : undefined}
           style={
             index > 0
-              ? { borderColor: onDark ? "rgb(242 244 247 / 0.16)" : "var(--border)" }
+              ? { borderColor: onDark ? "rgb(242 244 247 / 0.16)" : "var(--line)" }
               : undefined
           }
         >

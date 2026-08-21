@@ -72,13 +72,13 @@ export function CoinHud({
   const value = useCountUp(balance ?? 0, reduced);
 
   return (
-    <div className="flex items-center gap-3 rounded-[var(--r-card)] border border-border-strong bg-surface-1 px-4 py-2.5 shadow-[var(--shadow-2),var(--highlight)]">
+    <div className="flex items-center gap-3 rounded-[var(--r-card)] border border-[var(--line-strong)] bg-[var(--content)] px-4 py-2.5 shadow-[var(--shadow-float),var(--hairline-top)]">
       <Coins size={17} aria-hidden style={{ color: "var(--accent)" }} />
 
       <div className="min-w-0">
-        <p className="text-[11px] leading-none tracking-[0.02em] text-text-faint">Coin balance</p>
+        <p className="text-[11px] leading-none tracking-[0.02em] text-ink-faint">Coin balance</p>
         <p
-          className="tnum mt-1 text-[19px] font-semibold leading-none tracking-[-0.01em] text-text"
+          className="tnum mt-1 text-[19px] font-semibold leading-none tracking-[-0.01em] text-ink"
           aria-live="polite"
         >
           {loading && balance === null ? "—" : count(value)}
@@ -86,9 +86,9 @@ export function CoinHud({
       </div>
 
       {lifetimeEarned !== null && (
-        <div className="ml-2 hidden border-l border-border pl-3 sm:block">
-          <p className="text-[11px] leading-none tracking-[0.02em] text-text-faint">Earned</p>
-          <p className="tnum mt-1 text-[13px] leading-none text-text-dim">
+        <div className="ml-2 hidden border-l border-[var(--line)] pl-3 sm:block">
+          <p className="text-[11px] leading-none tracking-[0.02em] text-ink-faint">Earned</p>
+          <p className="tnum mt-1 text-[13px] leading-none text-ink-dim">
             {count(lifetimeEarned)}
           </p>
         </div>

@@ -46,7 +46,6 @@ export default function LoginPage() {
   return (
     <AuthShell
       image="/img/auth-signin.jpg"
-      imagePosition="55% 50%"
       eyebrow="Welcome back"
       headline={<>Pay the bill. Keep the change.</>}
       blurb="Ten thousand transactions, fourteen months, and every coin traceable to the payment that earned it."
@@ -56,10 +55,10 @@ export default function LoginPage() {
         ["14", "months"],
       ]}
     >
-      <h1 className="text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] text-text">
+      <h1 className="text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] text-ink">
         Sign in
       </h1>
-      <p className="mt-2 text-[14px] leading-relaxed text-text-dim">
+      <p className="mt-2 text-[14px] leading-relaxed text-ink-dim">
         See your statement and spend your coins.
       </p>
 
@@ -95,18 +94,18 @@ export default function LoginPage() {
 
       <Link
         href="/signup"
-        className="mt-5 inline-flex items-center gap-1.5 text-[13px] text-text-dim underline-offset-4 transition-colors hover:text-text hover:underline"
+        className="mt-5 inline-flex items-center gap-1.5 text-[13px] text-ink-dim underline-offset-4 transition-colors hover:text-ink hover:underline"
       >
         Create an account instead
         <ArrowRight size={13} aria-hidden />
       </Link>
 
-      <div className="mt-8 border-t border-border pt-5">
-        <p className="text-[12px] tracking-[0.02em] text-text-faint">Reviewer demo account</p>
-        <p className="mt-1.5 font-mono text-[12px] text-text-dim">
+      <div className="mt-8 border-t border-[var(--line)] pt-5">
+        <p className="text-[12px] tracking-[0.02em] text-ink-faint">Reviewer demo account</p>
+        <p className="mt-1.5 font-mono text-[12px] text-ink-dim">
           {DEMO_EMAIL} · {DEMO_PASSWORD}
         </p>
-        <p className="mt-1.5 text-[12px] leading-relaxed text-text-faint">
+        <p className="mt-1.5 text-[12px] leading-relaxed text-ink-faint">
           Already filled in above. It holds the full 10,000-row statement.
         </p>
       </div>

@@ -4,7 +4,7 @@ import { Coins, Wrench } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Overlay } from "@/components/ui/Overlay";
-import { ErrorState, Skeleton, StatusPill } from "@/components/ui/Primitives";
+import { ErrorState, Skeleton, StatusDot } from "@/components/ui/Primitives";
 import { ApiError, api, type Transaction, type TransactionDetail } from "@/lib/api";
 import { METHOD_LABEL, categoryColor, longDateTime, money } from "@/lib/format";
 
@@ -28,9 +28,9 @@ function Line({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-border py-3">
-      <dt className="shrink-0 text-[13px] text-text-faint">{label}</dt>
-      <dd className="min-w-0 text-right text-[13px] text-text">{children}</dd>
+    <div className="flex items-baseline justify-between gap-4 border-b border-[var(--line)] py-3">
+      <dt className="shrink-0 text-[13px] text-ink-faint">{label}</dt>
+      <dd className="min-w-0 text-right text-[13px] text-ink">{children}</dd>
     </div>
   );
 }
@@ -99,19 +99,19 @@ export function TransactionDrawer({
               Semibold sans at 34px, not mono — mono is for aligned columns
               (Groww decision 13). */}
           <div>
-            <p className="text-[12px] tracking-[0.02em] text-text-faint">
+            <p className="text-[12px] tracking-[0.02em] text-ink-faint">
               {isRefund ? "Refunded to you" : "Amount paid"}
             </p>
             <p
               className="tnum mt-1 text-[34px] font-semibold leading-[1.15] tracking-[-0.02em]"
-              style={{ color: isRefund ? "var(--success)" : "var(--text)" }}
+              style={{ color: isRefund ? "var(--up)" : "var(--ink)" }}
             >
               {money(row.amount)}
             </p>
             <div className="mt-2 flex items-center gap-3">
-              <StatusPill status={row.status} />
+              <StatusDot status={row.status} />
               {row.coins_earned > 0 && (
-                <span className="tnum inline-flex items-center gap-1.5 text-[13px] text-text-dim">
+                <span className="tnum inline-flex items-center gap-1.5 text-[13px] text-ink-dim">
                   <Coins size={13} aria-hidden style={{ color: "var(--accent)" }} />
                   {row.coins_earned} coins earned
                 </span>
@@ -134,11 +134,11 @@ export function TransactionDrawer({
             <Line label="Paid with">{METHOD_LABEL[row.method] ?? row.method}</Line>
             <Line label="When">{longDateTime(row.occurred_at)}</Line>
             <Line label="Reference">
-              <code className="font-mono text-[12px] text-text-dim">{row.source_id}</code>
+              <code className="font-mono text-[12px] text-ink-dim">{row.source_id}</code>
             </Line>
             {fresh && (
               <Line label="Source row">
-                <code className="tnum font-mono text-[12px] text-text-dim">
+                <code className="tnum font-mono text-[12px] text-ink-dim">
                   #{fresh.source_row_index}
                 </code>
               </Line>
@@ -150,8 +150,8 @@ export function TransactionDrawer({
               original value was and what rule was applied. Nothing was changed
               silently. */}
           <div>
-            <h3 className="flex items-center gap-2 text-[13px] font-medium text-text">
-              <Wrench size={13} aria-hidden className="text-text-faint" />
+            <h3 className="flex items-center gap-2 text-[13px] font-medium text-ink">
+              <Wrench size={13} aria-hidden className="text-ink-faint" />
               Import history
             </h3>
 
@@ -165,24 +165,24 @@ export function TransactionDrawer({
                 {fresh.anomalies.map((anomaly, index) => (
                   <li
                     key={`${anomaly.kind}-${index}`}
-                    className="rounded-[var(--r-control)] border border-border bg-surface-2 px-3 py-2.5"
+                    className="rounded-[var(--r-control)] border border-[var(--line)] bg-[var(--content-hover)] px-3 py-2.5"
                   >
-                    <p className="font-mono text-[11px] tracking-[0.02em] text-warning">
+                    <p className="font-mono text-[11px] tracking-[0.02em] text-[var(--hold)]">
                       {anomaly.kind}
                     </p>
                     {anomaly.original_value && (
-                      <p className="mt-1 break-all font-mono text-[12px] text-text-dim">
+                      <p className="mt-1 break-all font-mono text-[12px] text-ink-dim">
                         was: {anomaly.original_value}
                       </p>
                     )}
-                    <p className="mt-1 text-[12px] leading-relaxed text-text-faint">
+                    <p className="mt-1 text-[12px] leading-relaxed text-ink-faint">
                       {anomaly.resolution}
                     </p>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="mt-2 text-[12px] leading-relaxed text-text-faint">
+              <p className="mt-2 text-[12px] leading-relaxed text-ink-faint">
                 This row loaded exactly as supplied. No values were changed.
               </p>
             )}

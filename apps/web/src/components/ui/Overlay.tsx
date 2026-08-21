@@ -159,7 +159,7 @@ export function Overlay({
       <div
         aria-hidden
         className="absolute inset-0 bg-[rgb(0_0_0/0.62)] backdrop-blur-[2px]"
-        style={{ animation: "fade var(--t-state) var(--ease) both" }}
+        style={{ animation: "fade var(--t-move) var(--ease-out) both" }}
       />
 
       <div
@@ -170,20 +170,20 @@ export function Overlay({
         aria-describedby={description ? "overlay-description" : undefined}
         tabIndex={-1}
         className={[
-          "relative flex flex-col bg-surface-1 shadow-[var(--shadow-2)] outline-none",
+          "relative flex flex-col bg-[var(--content)] shadow-[var(--shadow-float)] outline-none",
           isDrawer
-            ? "h-full w-full max-w-[520px] border-l border-border"
-            : "w-full max-w-[460px] rounded-[var(--r-card)] border border-border-strong",
+            ? "h-full w-full max-w-[520px] border-l border-[var(--line)]"
+            : "w-full max-w-[460px] rounded-[var(--r-card)] border border-[var(--line-strong)]",
         ].join(" ")}
         style={{
-          animation: `${isDrawer ? "slide-in" : "pop-in"} var(--t-state) var(--ease) both`,
+          animation: `${isDrawer ? "slide-in" : "pop-in"} var(--t-move) var(--ease-out) both`,
         }}
       >
-        <header className="flex items-start justify-between gap-4 border-b border-border px-6 py-5">
+        <header className="flex items-start justify-between gap-4 border-b border-[var(--line)] px-6 py-5">
           <div className="min-w-0">
-            <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-text">{title}</h2>
+            <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-ink">{title}</h2>
             {description && (
-              <p id="overlay-description" className="mt-1 text-[13px] text-text-faint">
+              <p id="overlay-description" className="mt-1 text-[13px] text-ink-faint">
                 {description}
               </p>
             )}
@@ -192,7 +192,7 @@ export function Overlay({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="-mr-1.5 -mt-1 grid size-11 min-h-11 shrink-0 place-items-center rounded-[var(--r-control)] text-text-faint transition-colors hover:bg-surface-2 hover:text-text"
+            className="-mr-1.5 -mt-1 grid size-11 min-h-11 shrink-0 place-items-center rounded-[var(--r-control)] text-ink-faint transition-colors hover:bg-[var(--content-hover)] hover:text-ink"
           >
             <X size={18} aria-hidden />
           </button>
@@ -201,7 +201,7 @@ export function Overlay({
         <div className="scroll-area min-h-0 flex-1 overflow-y-auto px-6 py-5">{children}</div>
 
         {footer && (
-          <footer className="flex items-center justify-end gap-2 border-t border-border px-6 py-4">
+          <footer className="flex items-center justify-end gap-2 border-t border-[var(--line)] px-6 py-4">
             {footer}
           </footer>
         )}

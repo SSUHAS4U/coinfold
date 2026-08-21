@@ -4,8 +4,10 @@ Pexels Licence: free for commercial use, no attribution required, modification
 allowed. The manifest written alongside the files records every source URL, so
 the provenance of each asset is auditable rather than folklore.
 
-Fetched at 2400px wide: these are full-bleed backgrounds on displays up to
-1920 logical pixels, often at 2x DPR, so anything smaller visibly softens.
+Every image is checked for third-party branding before it ships. Earlier
+candidates were rejected for exactly that — one carried a real VISA Infinite
+card with an XP Investimentos logo, another a GENTCREATE wallet. Someone
+else's brand has no place in this product.
 
     python scripts/fetch_images.py
 """
@@ -19,32 +21,74 @@ from pathlib import Path
 
 OUT = Path(__file__).resolve().parents[1] / "apps" / "web" / "public" / "img"
 
-# 2400px, minimal compression. These carry the whole visual weight of the site.
-SUFFIX = "?auto=compress&cs=tinysrgb&w=2400"
+# 1800px is enough for a card that is never full-bleed, and keeps the page
+# weight sane. The hero and auth panels take 2400.
+def suffix(width: int) -> str:
+    return f"?auto=compress&cs=tinysrgb&w={width}"
 
-ASSETS: dict[str, str] = {
-    # --- Landing scroll story, in narrative order --------------------------
-    # Every image is checked for third-party branding before it ships. Two
-    # earlier candidates were rejected for exactly that: one carried a real
-    # VISA Infinite card with an XP Investimentos logo, another a "GENTCREATE"
-    # wallet. Someone else's brand has no place in this product's hero.
-    #
-    # 1. The coin, spotlit on black. The product's own symbol.
-    "story-1-coin": "https://images.pexels.com/photos/14856617/pexels-photo-14856617.jpeg",
-    # 2. Where the money goes: the city, after dark.
-    "story-2-city": "https://images.pexels.com/photos/26732100/pexels-photo-26732100.jpeg",
-    # 3. The sorting: abstract, warm, no subject to argue with the type.
-    "story-3-flow": "https://images.pexels.com/photos/21031387/pexels-photo-21031387.jpeg",
-    # 4. The payoff: coins, many of them.
-    "story-4-coins": "https://images.pexels.com/photos/7584354/pexels-photo-7584354.jpeg",
 
-    # --- Auth ---------------------------------------------------------------
-    "auth-signin": "https://images.pexels.com/photos/8358039/pexels-photo-8358039.jpeg",
-    "auth-signup": "https://images.pexels.com/photos/7584362/pexels-photo-7584362.jpeg",
-
-    # --- App chrome ---------------------------------------------------------
-    "app-banner": "https://images.pexels.com/photos/28795083/pexels-photo-28795083.jpeg",
+# Category imagery, one per spending category. Bright and airy to sit on the
+# light canvas — the dark set that suited the old near-black theme would fight
+# it. Keyed by the category slug the database uses.
+CATEGORIES: dict[str, str] = {
+    "food-dining": "https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg",
+    "travel": "https://images.pexels.com/photos/1008155/pexels-photo-1008155.jpeg",
+    "shopping": "https://images.pexels.com/photos/5872361/pexels-photo-5872361.jpeg",
+    "groceries": "https://images.pexels.com/photos/264636/pexels-photo-264636.jpeg",
+    "health": "https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg",
+    "fuel": "https://images.pexels.com/photos/9800029/pexels-photo-9800029.jpeg",
+    "education": "https://images.pexels.com/photos/5905445/pexels-photo-5905445.jpeg",
+    "entertainment": "https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg",
+    "utilities": "https://images.pexels.com/photos/3306057/pexels-photo-3306057.jpeg",
+    "insurance": "https://images.pexels.com/photos/7731375/pexels-photo-7731375.jpeg",
 }
+
+# Editorial imagery for the landing and auth screens.
+FEATURE: dict[str, str] = {
+    "auth-signin": "https://images.pexels.com/photos/4386370/pexels-photo-4386370.jpeg",
+    "auth-signup": "https://images.pexels.com/photos/5900226/pexels-photo-5900226.jpeg",
+    "story-pay": "https://images.pexels.com/photos/6963944/pexels-photo-6963944.jpeg",
+    "story-review": "https://images.pexels.com/photos/6289065/pexels-photo-6289065.jpeg",
+    "story-reward": "https://images.pexels.com/photos/6289028/pexels-photo-6289028.jpeg",
+}
+
+
+# Hero band photography. Full-bleed at 2560 — these carry the whole opening,
+# and anything smaller visibly softens on a 1440 display at 2x.
+#
+# One image per band of the scroll story, chosen so the ENTRANCE can echo what
+# the picture is doing (the echo principle): a warm room to open on, a lit
+# street for volume, a quiet desk for the sort, gold for the payoff.
+HERO: dict[str, str] = {
+    "hero-1-evening": "https://images.pexels.com/photos/13663208/pexels-photo-13663208.jpeg",
+    "hero-2-street": "https://images.pexels.com/photos/29446768/pexels-photo-29446768.jpeg",
+    "hero-3-desk": "https://images.pexels.com/photos/30473581/pexels-photo-30473581.jpeg",
+    "hero-4-gold": "https://images.pexels.com/photos/7584362/pexels-photo-7584362.jpeg",
+}
+
+
+def fetch(name: str, url: str, width: int, manifest: dict, failures: list[str]) -> None:
+    target = OUT / f"{name}.jpg"
+    try:
+        request = urllib.request.Request(
+            url + suffix(width),
+            headers={"User-Agent": "Mozilla/5.0 (coinfold asset fetch)"},
+        )
+        with urllib.request.urlopen(request, timeout=90) as response:  # noqa: S310
+            data = response.read()
+    except Exception as exc:  # noqa: BLE001 - report every failure by name
+        failures.append(f"{name}: {type(exc).__name__} {exc}")
+        return
+
+    target.write_bytes(data)
+    manifest[name] = {
+        "file": f"/img/{name}.jpg",
+        "source": url,
+        "provider": "Pexels",
+        "licence": "Pexels Licence — free for commercial use, no attribution required",
+        "bytes": len(data),
+    }
+    print(f"  {name:<16} {len(data) / 1024:>7.0f} KB")
 
 
 def main() -> int:
@@ -52,34 +96,24 @@ def main() -> int:
     manifest: dict[str, dict[str, object]] = {}
     failures: list[str] = []
 
-    for name, url in ASSETS.items():
-        target = OUT / f"{name}.jpg"
-        try:
-            request = urllib.request.Request(
-                url + SUFFIX,
-                headers={"User-Agent": "Mozilla/5.0 (coinfold asset fetch)"},
-            )
-            with urllib.request.urlopen(request, timeout=90) as response:  # noqa: S310
-                data = response.read()
-        except Exception as exc:  # noqa: BLE001 - report every failure by name
-            failures.append(f"{name}: {type(exc).__name__} {exc}")
-            continue
+    print("categories:")
+    for name, url in CATEGORIES.items():
+        fetch(f"cat-{name}", url, 1200, manifest, failures)
 
-        target.write_bytes(data)
-        manifest[name] = {
-            "file": f"/img/{name}.jpg",
-            "source": url,
-            "provider": "Pexels",
-            "licence": "Pexels Licence — free for commercial use, no attribution required",
-            "bytes": len(data),
-        }
-        print(f"  {name:<16} {len(data) / 1024:>7.0f} KB")
+    print("\nhero bands:")
+    for name, url in HERO.items():
+        fetch(name, url, 2560, manifest, failures)
+
+    print("\nfeature:")
+    for name, url in FEATURE.items():
+        fetch(name, url, 2000, manifest, failures)
 
     (OUT / "manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
     )
 
-    print(f"\n{len(manifest)} images in {OUT}")
+    total = sum(int(v["bytes"]) for v in manifest.values())
+    print(f"\n{len(manifest)} images, {total / 1024 / 1024:.1f} MB, in {OUT}")
     if failures:
         print(f"{len(failures)} failed:")
         for line in failures:
