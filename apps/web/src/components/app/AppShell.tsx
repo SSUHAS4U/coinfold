@@ -146,7 +146,7 @@ export function AppShell({
       {/* ---- Sidebar, permanent from lg up ---------------------------- */}
       <aside className="hidden border-r border-border bg-surface-1 lg:flex lg:h-dvh lg:flex-col lg:sticky lg:top-0">
         <div className="flex h-[73px] items-center border-b border-border px-5">
-          <Link href="/" className="inline-flex items-center gap-2.5 text-text">
+          <Link href="/app" className="inline-flex items-center gap-2.5 text-text">
             <Logo size={19} />
             <span className="text-[13px] font-medium uppercase tracking-[0.16em]">Coinfold</span>
           </Link>

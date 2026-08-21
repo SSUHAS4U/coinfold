@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { Grain, Logo, ScrollRail } from "@/components/landing/Atmosphere";
 import { StoryBackdrop, type StoryChapter } from "@/components/landing/StoryBackdrop";
-import { usePrefersReducedMotion } from "@/hooks/useBrowserState";
+import { useHasSession, usePrefersReducedMotion } from "@/hooks/useBrowserState";
 
 /**
  * The landing page: a scroll-driven photographic story.
@@ -43,6 +43,11 @@ export default function LandingPage() {
   const stageRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const reduced = usePrefersReducedMotion();
+  const hasSession = useHasSession();
+
+  useEffect(() => {
+    if (hasSession === true) window.location.replace("/app");
+  }, [hasSession]);
 
   useEffect(() => {
     // With motion disabled there is nothing to track: the stage un-pins and
@@ -99,16 +104,24 @@ export default function LandingPage() {
         };
 
   return (
-    <div className="relative min-h-dvh bg-bg">
+    <div id="top" className="relative min-h-dvh bg-bg">
       <Grain />
       {!reduced && <ScrollRail progress={p} />}
 
       <header className="fixed inset-x-0 top-0 z-30">
         <nav className="mx-auto flex max-w-[1200px] items-center gap-6 px-5 py-5 sm:px-8">
-          <span className="mr-auto inline-flex items-center gap-2.5 text-white">
+          <Link
+            href="#top"
+            onClick={(event) => {
+              event.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="mr-auto inline-flex items-center gap-2.5 text-white"
+            aria-label="Back to top"
+          >
             <Logo size={20} />
             <span className="text-[13px] font-medium uppercase tracking-[0.16em]">Coinfold</span>
-          </span>
+          </Link>
           <Link
             href="/login"
             className="text-[12px] uppercase tracking-[0.14em] text-white/65 transition-colors hover:text-white"
