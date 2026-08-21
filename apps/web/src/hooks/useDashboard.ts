@@ -21,9 +21,14 @@ import {
  * charts provably agree: they are handed the same value, not three copies that
  * can drift.
  *
- * No state library. The state here is one plain object plus four request
+ * No state library. The client state here is one plain object plus four request
  * results; Redux or Zustand would add a dependency and a directory for no
  * behaviour this app needs. See docs/DECISIONS.md.
+ *
+ * Loading is DERIVED, never stored. Each result carries the query key it was
+ * fetched for, so "loading" is simply "the key I hold is not the key I want".
+ * Storing a flag would mean setting it synchronously inside the effect, which
+ * causes a cascading render — and React's own lint rule rejects it.
  */
 
 export interface Query {
@@ -128,11 +133,14 @@ export function isFiltered(q: Query): boolean {
   );
 }
 
-interface Resource<T> {
+/** A result plus the query key it belongs to. */
+interface Keyed<T> {
+  key: string;
   data: T;
-  loading: boolean;
   error: ApiError | null;
 }
+
+const EMPTY_KEY = "";
 
 export function useDashboard() {
   const [query, dispatch] = useReducer(reducer, INITIAL_QUERY);
@@ -152,39 +160,45 @@ export function useDashboard() {
     [query, debouncedSearch],
   );
 
-  const [transactions, setTransactions] = useState<Resource<Transaction[]>>({
+  // Bumped to force a refetch after a redeem, or on Retry.
+  const [nonce, setNonce] = useState(0);
+  const refresh = useCallback(() => setNonce((n) => n + 1), []);
+
+  const apiQuery = useMemo(() => toApiQuery(effective), [effective]);
+  const queryKey = useMemo(
+    () => `${nonce}:${JSON.stringify(apiQuery)}`,
+    [nonce, apiQuery],
+  );
+
+  const [rows, setRows] = useState<Keyed<Transaction[]>>({
+    key: EMPTY_KEY,
     data: [],
-    loading: true,
     error: null,
   });
   const [meta, setMeta] = useState({ total: 0, totalPages: 1 });
-  const [summary, setSummary] = useState<Resource<Summary | null>>({
+  const [summaryState, setSummary] = useState<Keyed<Summary | null>>({
+    key: EMPTY_KEY,
     data: null,
-    loading: true,
     error: null,
   });
-  const [byCategory, setByCategory] = useState<Resource<CategorySpend[]>>({
+  const [categoryState, setCategory] = useState<Keyed<CategorySpend[]>>({
+    key: EMPTY_KEY,
     data: [],
-    loading: true,
     error: null,
   });
-  const [monthly, setMonthly] = useState<Resource<MonthlyPoint[]>>({
+  const [monthlyState, setMonthly] = useState<Keyed<MonthlyPoint[]>>({
+    key: EMPTY_KEY,
     data: [],
-    loading: true,
     error: null,
   });
 
   const [facets, setFacets] = useState<Facets | null>(null);
   const [balance, setBalance] = useState<Balance | null>(null);
   const [rewards, setRewards] = useState<Reward[]>([]);
-  const [rewardsState, setRewardsState] = useState<{ loading: boolean; error: ApiError | null }>({
-    loading: true,
-    error: null,
-  });
-
-  // Bumped to force a refetch after a redeem, or on Retry.
-  const [nonce, setNonce] = useState(0);
-  const refresh = useCallback(() => setNonce((n) => n + 1), []);
+  const [rewardsResult, setRewardsResult] = useState<{
+    key: number;
+    error: ApiError | null;
+  }>({ key: -1, error: null });
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -194,13 +208,6 @@ export function useDashboard() {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-
-    const apiQuery = toApiQuery(effective);
-
-    setTransactions((s) => ({ ...s, loading: true }));
-    setSummary((s) => ({ ...s, loading: true }));
-    setByCategory((s) => ({ ...s, loading: true }));
-    setMonthly((s) => ({ ...s, loading: true }));
 
     const settle = <T,>(
       promise: Promise<T>,
@@ -217,48 +224,49 @@ export function useDashboard() {
       settle(
         api.transactions(apiQuery, controller.signal),
         (page) => {
-          setTransactions({ data: page.rows, loading: false, error: null });
+          setRows({ key: queryKey, data: page.rows, error: null });
           setMeta({ total: page.total, totalPages: page.total_pages });
         },
-        (error) => setTransactions({ data: [], loading: false, error }),
+        (error) => setRows({ key: queryKey, data: [], error }),
       ),
       settle(
         api.summary(apiQuery, controller.signal),
-        (data) => setSummary({ data, loading: false, error: null }),
-        (error) => setSummary({ data: null, loading: false, error }),
+        (data) => setSummary({ key: queryKey, data, error: null }),
+        (error) => setSummary({ key: queryKey, data: null, error }),
       ),
       settle(
         api.byCategory(apiQuery, controller.signal),
-        (data) => setByCategory({ data, loading: false, error: null }),
-        (error) => setByCategory({ data: [], loading: false, error }),
+        (data) => setCategory({ key: queryKey, data, error: null }),
+        (error) => setCategory({ key: queryKey, data: [], error }),
       ),
       settle(
         api.monthly(apiQuery, controller.signal),
-        (data) => setMonthly({ data, loading: false, error: null }),
-        (error) => setMonthly({ data: [], loading: false, error }),
+        (data) => setMonthly({ key: queryKey, data, error: null }),
+        (error) => setMonthly({ key: queryKey, data: [], error }),
       ),
     ]);
 
     return () => controller.abort();
-  }, [effective, nonce]);
+  }, [apiQuery, queryKey]);
 
-  // Facets, balance and the catalogue do not depend on the filters, so they are
-  // fetched once rather than on every filter change.
+  // Facets do not depend on the filters, so they are fetched once.
   useEffect(() => {
-    void api.facets().then(setFacets).catch(() => setFacets(null));
+    void api
+      .facets()
+      .then(setFacets)
+      .catch(() => setFacets(null));
   }, []);
 
   useEffect(() => {
-    setRewardsState({ loading: true, error: null });
     void Promise.all([api.balance(), api.catalogue()])
       .then(([b, r]) => {
         setBalance(b);
         setRewards(r);
-        setRewardsState({ loading: false, error: null });
+        setRewardsResult({ key: nonce, error: null });
       })
       .catch((cause) =>
-        setRewardsState({
-          loading: false,
+        setRewardsResult({
+          key: nonce,
           error: cause instanceof ApiError ? cause : null,
         }),
       );
@@ -279,6 +287,32 @@ export function useDashboard() {
       })),
     );
   }, []);
+
+  // --- Derived views, in the shape the components already expect -----------
+  const transactions = {
+    data: rows.data,
+    loading: rows.key !== queryKey,
+    error: rows.error,
+  };
+  const summary = {
+    data: summaryState.data,
+    loading: summaryState.key !== queryKey,
+    error: summaryState.error,
+  };
+  const byCategory = {
+    data: categoryState.data,
+    loading: categoryState.key !== queryKey,
+    error: categoryState.error,
+  };
+  const monthly = {
+    data: monthlyState.data,
+    loading: monthlyState.key !== queryKey,
+    error: monthlyState.error,
+  };
+  const rewardsState = {
+    loading: rewardsResult.key !== nonce,
+    error: rewardsResult.error,
+  };
 
   return {
     query,

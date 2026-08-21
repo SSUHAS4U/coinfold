@@ -42,31 +42,30 @@ export function TransactionDrawer({
   row: Transaction | null;
   onClose: () => void;
 }) {
+  // Detail and error both carry the row they belong to, so "is this loading"
+  // and "is this stale" are DERIVED rather than stored. That removes the
+  // synchronous setState-in-effect the previous version needed to reset them,
+  // and makes it impossible to render one row's repairs under another's name.
   const [detail, setDetail] = useState<TransactionDetail | null>(null);
-  const [error, setError] = useState<ApiError | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<{ forId: number; error: ApiError } | null>(null);
+
+  const fresh = row !== null && detail?.id === row.id ? detail : null;
+  const freshError = row !== null && error?.forId === row.id ? error.error : null;
+  const loading = row !== null && fresh === null && freshError === null;
 
   useEffect(() => {
-    if (!row) {
-      setDetail(null);
-      setError(null);
-      return;
-    }
+    if (!row) return;
 
     let cancelled = false;
-    setLoading(true);
-    setError(null);
+    const id = row.id;
 
     api
-      .transaction(row.id)
+      .transaction(id)
       .then((data) => {
         if (!cancelled) setDetail(data);
       })
       .catch((cause) => {
-        if (!cancelled && cause instanceof ApiError) setError(cause);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled && cause instanceof ApiError) setError({ forId: id, error: cause });
       });
 
     return () => {
@@ -87,12 +86,12 @@ export function TransactionDrawer({
       title={row.merchant}
       description={longDateTime(row.occurred_at)}
     >
-      {error ? (
+      {freshError ? (
         <ErrorState
-          what={error.fault.what}
-          why={error.fault.why}
-          action={error.fault.action}
-          traceId={error.fault.trace_id}
+          what={freshError.fault.what}
+          why={freshError.fault.why}
+          action={freshError.fault.action}
+          traceId={freshError.fault.trace_id}
         />
       ) : (
         <div className="space-y-6">
@@ -137,10 +136,10 @@ export function TransactionDrawer({
             <Line label="Reference">
               <code className="font-mono text-[12px] text-text-dim">{row.source_id}</code>
             </Line>
-            {detail && (
+            {fresh && (
               <Line label="Source row">
                 <code className="tnum font-mono text-[12px] text-text-dim">
-                  #{detail.source_row_index}
+                  #{fresh.source_row_index}
                 </code>
               </Line>
             )}
@@ -156,14 +155,14 @@ export function TransactionDrawer({
               Import history
             </h3>
 
-            {loading && !detail ? (
+            {loading ? (
               <div className="mt-3 space-y-2">
                 <Skeleton className="h-12 w-full" />
                 <Skeleton className="h-12 w-full" />
               </div>
-            ) : detail && detail.anomalies.length > 0 ? (
+            ) : fresh && fresh.anomalies.length > 0 ? (
               <ul className="mt-3 space-y-2">
-                {detail.anomalies.map((anomaly, index) => (
+                {fresh.anomalies.map((anomaly, index) => (
                   <li
                     key={`${anomaly.kind}-${index}`}
                     className="rounded-[var(--r-control)] border border-border bg-surface-2 px-3 py-2.5"

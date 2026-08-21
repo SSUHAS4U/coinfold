@@ -1,278 +1,49 @@
 "use client";
 
-import { LogOut, Moon, Sun } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { ArrowRight, Coins, Receipt } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
-import { CategoryDonut, MonthlyTrend } from "@/components/charts/SpendCharts";
-import { Logo } from "@/components/landing/Atmosphere";
-import { StillBackdrop } from "@/components/landing/PhotoBackdrop";
-import { CoinHud } from "@/components/dashboard/CoinHud";
-import { FilterBar } from "@/components/dashboard/FilterBar";
-import { Pagination } from "@/components/dashboard/Pagination";
+import { StatRow } from "@/components/app/StatRow";
+import { useDashboardContext } from "@/components/app/DashboardContext";
+import { CategoryDonut } from "@/components/charts/SpendCharts";
 import { TransactionDrawer } from "@/components/dashboard/TransactionDrawer";
-import { RewardsPanel } from "@/components/rewards/RewardsPanel";
-import { TransactionTable } from "@/components/table/TransactionTable";
-import { Panel, PanelHeading, Skeleton } from "@/components/ui/Primitives";
-import { useDashboard } from "@/hooks/useDashboard";
-import { type Transaction, tokens } from "@/lib/api";
-import { count, money, moneyCompact } from "@/lib/format";
+import { StillBanner } from "@/components/landing/Banner";
+import { Panel, PanelHeading, Skeleton, StatusPill } from "@/components/ui/Primitives";
+import type { Transaction } from "@/lib/api";
+import { categoryColor, count, money, shortDate } from "@/lib/format";
 
 /**
- * The dashboard.
+ * Overview: the conclusion, not the evidence.
  *
- * Layout follows the density rule: the conclusion first (what was spent, what
- * was earned), then the evidence (charts), then the detail (table). The one
- * framed element is the coin HUD, so the eye lands there.
+ * Headline figures, the category split, the five most recent payments, and
+ * where the coins stand. Anything that needs working with — the full table,
+ * the filters — lives on its own route, which is what stops this screen
+ * becoming the dumping ground it was before.
  */
 
-function ThemeToggle() {
-  const [light, setLight] = useState(false);
-
-  useEffect(() => {
-    setLight(document.documentElement.classList.contains("light"));
-  }, []);
-
-  const toggle = useCallback(() => {
-    const next = !document.documentElement.classList.contains("light");
-    document.documentElement.classList.toggle("light", next);
-    localStorage.setItem("coinfold.theme", next ? "light" : "dark");
-    setLight(next);
-  }, []);
-
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={light ? "Switch to dark theme" : "Switch to light theme"}
-      className="grid size-11 min-h-11 place-items-center rounded-[var(--r-control)] border border-border text-text-dim transition-colors duration-[var(--t-interaction)] hover:border-border-strong hover:text-text"
-    >
-      {light ? <Moon size={16} aria-hidden /> : <Sun size={16} aria-hidden />}
-    </button>
-  );
-}
-
-/**
- * The stat row. Figures sit directly on the canvas with hairline separators —
- * no card per stat, which is the fastest way a stat row becomes visual noise.
- */
-function StatRow({
-  spend,
-  refunded,
-  matched,
-  failed,
-  pending,
-  coins,
-  loading,
-  onDark,
-}: {
-  spend: string;
-  refunded: string;
-  matched: number;
-  failed: number;
-  pending: number;
-  coins: number;
-  loading: boolean;
-  /**
-   * True when this sits on the photographic band. That surface is dark in both
-   * themes, so its ink is pinned light rather than following --text, which
-   * flips to near-black in light mode and vanishes against the scrim.
-   */
-  onDark?: boolean;
-}) {
-  const ink = onDark ? "#F2F4F7" : "var(--text)";
-  const inkDim = onDark ? "rgb(242 244 247 / 0.66)" : "var(--text-faint)";
-  // The full figure (₹6,20,42,662.87) does not fit a 360px column and was
-  // truncating to "₹6,20,42,66…", which is worse than useless — a partial
-  // number reads as a real one. Narrow viewports get the compact form
-  // (₹6.2Cr) instead, which is exact enough to act on and always fits.
-  const stats: { label: string; value: string; compact?: string; tone?: string }[] = [
-    { label: "Total spent", value: money(spend), compact: moneyCompact(spend) },
-    // The label already carries the direction, so the figure is shown as a
-    // magnitude. "Refunded -₹10.3L" reads as money lost, which is backwards.
-    {
-      label: "Refunded",
-      value: moneyCompact(Math.abs(Number(refunded) || 0)),
-      tone: "var(--success)",
-    },
-    { label: "Transactions", value: count(matched) },
-    {
-      label: "Failed",
-      value: count(failed),
-      tone: failed > 0 ? (onDark ? "#F0654E" : "var(--danger)") : undefined,
-    },
-    {
-      label: "Pending",
-      value: count(pending),
-      tone: pending > 0 ? (onDark ? "#F5B544" : "var(--warning)") : undefined,
-    },
-    { label: "Coins earned", value: count(coins), tone: onDark ? "#5BE9B9" : "var(--accent)" },
-  ];
-
-  return (
-    <dl className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3 lg:grid-cols-6">
-      {stats.map((stat, index) => (
-        <div
-          key={stat.label}
-          className={index > 0 ? "lg:border-l lg:pl-6" : undefined}
-          style={index > 0 ? { borderColor: onDark ? "rgb(242 244 247 / 0.16)" : "var(--border)" } : undefined}
-        >
-          <dt className="text-[12px] tracking-[0.02em]" style={{ color: inkDim }}>
-            {stat.label}
-          </dt>
-          <dd>
-            {loading ? (
-              <Skeleton className="mt-1.5 h-7 w-24" />
-            ) : (
-              <span
-                className="tnum mt-1 block truncate text-[22px] font-semibold tracking-[-0.02em]"
-                style={{ color: stat.tone ?? ink }}
-                title={stat.value}
-              >
-                {stat.compact ? (
-                  <>
-                    <span className="sm:hidden">{stat.compact}</span>
-                    <span className="hidden sm:inline">{stat.value}</span>
-                  </>
-                ) : (
-                  stat.value
-                )}
-              </span>
-            )}
-          </dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
-
-export default function DashboardPage() {
-  const router = useRouter();
-  const [authorised, setAuthorised] = useState<boolean | null>(null);
+export default function OverviewPage() {
+  const { summary, byCategory, transactions, query, dispatch, balance, rewardsState } =
+    useDashboardContext();
   const [openRow, setOpenRow] = useState<Transaction | null>(null);
 
-  // Guard on the client: the token lives in sessionStorage, so the server has
-  // no way to know whether this request is authenticated.
-  useEffect(() => {
-    if (tokens.access) {
-      setAuthorised(true);
-    } else {
-      setAuthorised(false);
-      router.replace("/login");
-    }
-  }, [router]);
-
-  const {
-    query,
-    dispatch,
-    filtered,
-    transactions,
-    meta,
-    summary,
-    byCategory,
-    monthly,
-    facets,
-    balance,
-    rewards,
-    rewardsState,
-    refresh,
-    setBalanceOptimistically,
-  } = useDashboard();
-
-  const signOut = useCallback(() => {
-    tokens.clear();
-    router.replace("/login");
-  }, [router]);
-
-  /** A chart click toggles the same category filter the chips drive. */
-  const onCategorySelect = useCallback(
-    (slug: string) => dispatch({ type: "toggle", key: "categories", value: slug }),
-    [dispatch],
-  );
-
-  /** A trend click sets the date window to that whole month, or clears it. */
-  const onMonthSelect = useCallback(
-    (month: string) => {
-      const [year, m] = month.split("-").map(Number);
-      const from = `${month}-01`;
-      const last = new Date(Date.UTC(year, m, 0)).getUTCDate();
-      const to = `${month}-${String(last).padStart(2, "0")}`;
-      dispatch(
-        query.dateFrom === from && query.dateTo === to
-          ? { type: "set", patch: { dateFrom: "", dateTo: "" } }
-          : { type: "set", patch: { dateFrom: from, dateTo: to } },
-      );
-    },
-    [dispatch, query.dateFrom, query.dateTo],
-  );
-
-  const selectedMonth =
-    query.dateFrom && query.dateTo && query.dateFrom.slice(0, 7) === query.dateTo.slice(0, 7)
-      ? query.dateFrom.slice(0, 7)
-      : undefined;
-
-  if (authorised !== true) {
-    return (
-      <main className="grid min-h-dvh place-items-center">
-        <p className="text-[13px] text-text-faint">
-          {authorised === null ? "Checking your session…" : "Redirecting to sign in…"}
-        </p>
-      </main>
-    );
-  }
+  const recent = transactions.data.slice(0, 5);
 
   return (
-    <div className="min-h-dvh">
-      <header className="sticky top-0 z-20 border-b border-border bg-bg/85 backdrop-blur-md">
-        <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
-          <a href="/" className="mr-auto inline-flex items-center gap-2.5 text-text">
-            <Logo size={19} />
-            <span className="text-[13px] font-medium uppercase tracking-[0.16em]">Coinfold</span>
-          </a>
-
-          <CoinHud
-            balance={balance?.balance ?? null}
-            lifetimeEarned={balance?.lifetime_earned ?? null}
-            loading={rewardsState.loading}
-          />
-
-          <ThemeToggle />
-
-          <button
-            type="button"
-            onClick={signOut}
-            aria-label="Sign out"
-            className="grid size-11 min-h-11 place-items-center rounded-[var(--r-control)] border border-border text-text-dim transition-colors duration-[var(--t-interaction)] hover:border-border-strong hover:text-text"
-          >
-            <LogOut size={16} aria-hidden />
-          </button>
+    <div className="space-y-7">
+      {/* Headline figures on a photographic banner. */}
+      <section
+        aria-label="Summary"
+        className="relative overflow-hidden rounded-[var(--r-card)] border border-border p-6 sm:p-8"
+      >
+        <StillBanner src="/img/app-banner.jpg" overlay={0.74} />
+        <div className="relative">
+          <p className="text-[12px] uppercase tracking-[0.2em] text-white/60">This statement</p>
+          <h2 className="mt-2 text-[clamp(1.5rem,3vw,2.1rem)] font-semibold tracking-[-0.02em] text-white">
+            Where your money went
+          </h2>
         </div>
-      </header>
-
-      <main className="mx-auto max-w-[1400px] space-y-8 px-4 py-8 sm:px-6">
-        {/* Conclusion first, on a photographic band. The image is heavily
-            scrimmed: it supplies depth and a sense of place, and must never
-            compete with the figures sitting on it. */}
-        <section
-          aria-label="Summary"
-          className="relative overflow-hidden rounded-[var(--r-card)] border border-border p-6 sm:p-8"
-        >
-          <StillBackdrop src="/img/card-desk.jpg" alt="" position="center" overlay={0.72} />
-          <div className="relative">
-            <p
-              className="text-[12px] uppercase tracking-[0.18em]"
-              style={{ color: "rgb(242 244 247 / 0.66)" }}
-            >
-              This statement
-            </p>
-            <h1
-              className="mt-2 text-[clamp(1.5rem,3vw,2.2rem)] font-semibold tracking-[-0.02em]"
-              style={{ color: "#F2F4F7" }}
-            >
-              Where your money went
-            </h1>
-          </div>
-          <div className="relative mt-7">
+        <div className="relative mt-7">
           <StatRow
             spend={summary.data?.total_spend ?? "0"}
             refunded={summary.data?.total_refunded ?? "0"}
@@ -283,107 +54,163 @@ export default function DashboardPage() {
             loading={summary.loading && !summary.data}
             onDark
           />
-          </div>
-        </section>
-
-        {/* Evidence */}
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
-          <Panel>
-            <PanelHeading
-              title="Where it went"
-              hint="Click a slice or a row to filter everything below."
-            />
-            <CategoryDonut
-              data={byCategory.data}
-              loading={byCategory.loading && byCategory.data.length === 0}
-              selected={query.categories}
-              onSelect={onCategorySelect}
-            />
-          </Panel>
-
-          <Panel>
-            <PanelHeading title="Month by month" hint="Click a month to filter to it." />
-            <MonthlyTrend
-              data={monthly.data}
-              loading={monthly.loading && monthly.data.length === 0}
-              onSelectMonth={onMonthSelect}
-              selectedMonth={selectedMonth}
-            />
-          </Panel>
         </div>
+      </section>
 
-        {/* Rewards */}
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+        {/* Category split */}
         <Panel>
           <PanelHeading
-            title="Rewards"
-            hint="One coin for every ₹100 on a successful payment, capped at 100 per transaction."
+            title="Where it went"
+            hint="Click a slice to filter every screen."
+            action={
+              <Link
+                href="/app/analytics"
+                className="inline-flex h-9 min-h-9 items-center gap-1.5 rounded-[var(--r-control)] border border-border px-3 text-[12.5px] text-text-dim transition-colors hover:border-border-strong hover:text-text"
+              >
+                Analytics
+                <ArrowRight size={13} aria-hidden />
+              </Link>
+            }
           />
-          <RewardsPanel
-            balance={balance}
-            rewards={rewards}
-            loading={rewardsState.loading}
-            error={rewardsState.error}
-            onBalanceChange={setBalanceOptimistically}
-            onRedeemed={refresh}
-            onRetry={refresh}
+          <CategoryDonut
+            data={byCategory.data}
+            loading={byCategory.loading && byCategory.data.length === 0}
+            selected={query.categories}
+            onSelect={(slug) => dispatch({ type: "toggle", key: "categories", value: slug })}
           />
         </Panel>
 
-        {/* Detail */}
-        <Panel padded={false}>
-          <div className="space-y-5 p-6 pb-0">
+        <div className="space-y-6">
+          {/* Coins */}
+          <Panel>
             <PanelHeading
-              title="Transactions"
-              hint="All 10,000 rows, filtered and sorted on the server."
-            />
-            <FilterBar
-              query={query}
-              facets={facets}
-              matched={meta.total}
-              onSearch={(search) => dispatch({ type: "set", patch: { search } })}
-              onToggle={(key, value) => dispatch({ type: "toggle", key, value })}
-              onSet={(patch) => dispatch({ type: "set", patch })}
-              onReset={() => dispatch({ type: "reset" })}
-            />
-          </div>
-
-          <div className="mt-5">
-            <TransactionTable
-              rows={transactions.data}
-              loading={transactions.loading}
-              error={
-                transactions.error
-                  ? {
-                      what: transactions.error.fault.what,
-                      why: transactions.error.fault.why,
-                      action: transactions.error.fault.action,
-                      traceId: transactions.error.fault.trace_id,
-                    }
-                  : null
+              title="Your coins"
+              action={
+                <Link
+                  href="/app/rewards"
+                  className="inline-flex h-9 min-h-9 items-center gap-1.5 rounded-[var(--r-control)] border border-border px-3 text-[12.5px] text-text-dim transition-colors hover:border-border-strong hover:text-text"
+                >
+                  Spend them
+                  <ArrowRight size={13} aria-hidden />
+                </Link>
               }
-              sortBy={query.sortBy}
-              direction={query.direction}
-              onSort={(key) => dispatch({ type: "sort", key })}
-              onOpen={setOpenRow}
-              onRetry={refresh}
-              onClearFilters={() => dispatch({ type: "reset" })}
-              filtered={filtered}
-              pageSize={query.pageSize}
             />
-          </div>
+            {rewardsState.loading && !balance ? (
+              <Skeleton className="h-[92px] w-full" />
+            ) : (
+              <div className="flex flex-wrap items-end gap-x-10 gap-y-4">
+                <div>
+                  <p className="text-[12px] tracking-[0.02em] text-text-faint">Balance</p>
+                  <p className="tnum mt-1 inline-flex items-center gap-2 text-[34px] font-semibold leading-none tracking-[-0.02em] text-text">
+                    <Coins size={22} aria-hidden style={{ color: "var(--accent)" }} />
+                    {count(balance?.balance ?? 0)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[12px] tracking-[0.02em] text-text-faint">Earned</p>
+                  <p className="tnum mt-1 text-[17px] font-medium text-text-dim">
+                    {count(balance?.lifetime_earned ?? 0)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[12px] tracking-[0.02em] text-text-faint">Spent</p>
+                  <p className="tnum mt-1 text-[17px] font-medium text-text-dim">
+                    {count(balance?.lifetime_spent ?? 0)}
+                  </p>
+                </div>
+              </div>
+            )}
+          </Panel>
 
-          <div className="px-6 pb-6">
-            <Pagination
-              page={query.page}
-              totalPages={meta.totalPages}
-              total={meta.total}
-              pageSize={query.pageSize}
-              onPage={(page) => dispatch({ type: "page", page })}
-              onPageSize={(pageSize) => dispatch({ type: "set", patch: { pageSize } })}
+          {/* Recent activity */}
+          <Panel>
+            <PanelHeading
+              title="Latest payments"
+              action={
+                <Link
+                  href="/app/transactions"
+                  className="inline-flex h-9 min-h-9 items-center gap-1.5 rounded-[var(--r-control)] border border-border px-3 text-[12.5px] text-text-dim transition-colors hover:border-border-strong hover:text-text"
+                >
+                  All 10,000
+                  <ArrowRight size={13} aria-hidden />
+                </Link>
+              }
             />
-          </div>
-        </Panel>
-      </main>
+
+            {transactions.loading && recent.length === 0 ? (
+              <div className="space-y-0">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 border-b border-border py-3">
+                    <Skeleton className="size-1.5 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-3.5 w-36" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                    <Skeleton className="h-3.5 w-20" />
+                  </div>
+                ))}
+              </div>
+            ) : recent.length === 0 ? (
+              <p className="py-8 text-center text-[13px] text-text-faint">
+                No payments match the current filters.
+              </p>
+            ) : (
+              <ul className="space-y-0">
+                {recent.map((row) => (
+                  <li key={row.id}>
+                    <button
+                      type="button"
+                      onClick={() => setOpenRow(row)}
+                      className="flex min-h-11 w-full items-center gap-3 border-b border-border py-3 text-left transition-colors hover:bg-surface-2"
+                    >
+                      <span
+                        aria-hidden
+                        className="size-1.5 shrink-0 rounded-full"
+                        style={{ background: categoryColor(row.accent_hue) }}
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[13.5px] font-medium text-text">
+                          {row.merchant}
+                        </span>
+                        <span className="mt-0.5 block truncate text-[12px] text-text-faint">
+                          {row.category_label} · {shortDate(row.occurred_at)}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-right">
+                        <span
+                          className="tnum block text-[13.5px] font-medium"
+                          style={{
+                            color:
+                              Number(row.amount) < 0 ? "var(--success)" : "var(--text)",
+                          }}
+                        >
+                          {money(row.amount)}
+                        </span>
+                        <span className="mt-0.5 block">
+                          <StatusPill status={row.status} />
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+        </div>
+      </div>
+
+      {/* A quiet pointer to the thing this screen deliberately does not hold. */}
+      <Link
+        href="/app/transactions"
+        className="flex min-h-11 items-center gap-3 rounded-[var(--r-card)] border border-border bg-surface-1 px-5 py-4 text-[13.5px] text-text-dim transition-colors hover:border-border-strong hover:text-text"
+      >
+        <Receipt size={16} aria-hidden className="shrink-0" />
+        <span className="min-w-0 flex-1">
+          Search, filter and sort all {count(summary.data?.matched ?? 10000)} transactions
+        </span>
+        <ArrowRight size={15} aria-hidden className="shrink-0" />
+      </Link>
 
       <TransactionDrawer row={openRow} onClose={() => setOpenRow(null)} />
     </div>

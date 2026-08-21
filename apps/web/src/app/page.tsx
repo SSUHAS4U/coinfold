@@ -4,50 +4,31 @@ import { ArrowRight, Coins } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { Grain, Logo, ScrollRail, Wash } from "@/components/landing/Atmosphere";
-import { ParticleField } from "@/components/landing/ParticleField";
-import { PhotoBackdrop, type Chapter } from "@/components/landing/PhotoBackdrop";
+import { Grain, Logo, ScrollRail } from "@/components/landing/Atmosphere";
+import { StoryBackdrop, type StoryChapter } from "@/components/landing/StoryBackdrop";
+import { usePrefersReducedMotion } from "@/hooks/useBrowserState";
 
 /**
- * The landing page: a scroll-driven data story.
+ * The landing page: a scroll-driven photographic story.
  *
- * The hero visual is not a stock photograph or a gradient blob — it is
- * 10,000 canvas particles, one per transaction in the sample dataset, each
- * carrying its real category colour. Scrolling reorganises them: scattered
- * field, then a stream, then sorted into ten bands whose thickness is each
- * category's genuine share of spend, then collapsed into a coin.
+ * Four chapters, four full-bleed photographs. Scrolling pushes each image in,
+ * drifts it against the scroll, and cross-fades to the next, while the copy
+ * over it counts the product's real figures up. Images and copy are driven by
+ * ONE progress number taken from the pinned stage, so they cannot desync.
  *
- * Motion that carries data beats motion that decorates (SpaceX note). The
- * artwork here IS the dataset, which is also why it cannot look like anyone
- * else's landing page.
- *
- * Mechanism: one pinned stage, one scroll listener, one rAF. Progress through
- * the pinned region drives both the copy and the canvas from a single value,
- * so they cannot drift apart the way parallel timers do.
+ * Under prefers-reduced-motion the stage un-pins and every chapter lays out in
+ * full, statically. Nothing is hidden behind an animation that never runs.
  */
 
 const TOTAL_TX = 10_000;
 const TOTAL_COINS = 362_629;
 const MONTHS = 14;
 
-const LEGEND: { label: string; hue: number }[] = [
-  { label: "Travel", hue: 196 },
-  { label: "Shopping", hue: 292 },
-  { label: "Utilities", hue: 48 },
-  { label: "Food & Dining", hue: 12 },
-  { label: "Health", hue: 158 },
-  { label: "Education", hue: 266 },
-  { label: "Entertainment", hue: 330 },
-  { label: "Groceries", hue: 95 },
-  { label: "Fuel", hue: 32 },
-  { label: "Insurance", hue: 232 },
-];
-
-const BACKDROPS: Chapter[] = [
-  { src: "/img/coin-hero.jpg", alt: "", at: 0.0, position: "60% 45%" },
-  { src: "/img/card-tap.jpg", alt: "", at: 0.26, position: "center" },
-  { src: "/img/market-night.jpg", alt: "", at: 0.52, position: "center" },
-  { src: "/img/coin-stack.jpg", alt: "", at: 0.8, position: "center" },
+const CHAPTERS: StoryChapter[] = [
+  { src: "/img/story-1-coin.jpg", at: 0.0, position: "62% 50%", copySide: "left" },
+  { src: "/img/story-2-city.jpg", at: 0.34, position: "50% 42%", copySide: "left" },
+  { src: "/img/story-3-flow.jpg", at: 0.64, position: "center", copySide: "right" },
+  { src: "/img/story-4-coins.jpg", at: 0.92, position: "center", copySide: "center" },
 ];
 
 function chapter(progress: number, start: number, end: number): number {
@@ -61,15 +42,12 @@ function easeOut(t: number): number {
 export default function LandingPage() {
   const stageRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
-  const [reduced, setReduced] = useState(false);
+  const reduced = usePrefersReducedMotion();
 
   useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (media.matches) {
-      setReduced(true);
-      setProgress(1);
-      return;
-    }
+    // With motion disabled there is nothing to track: the stage un-pins and
+    // every chapter is laid out in full below.
+    if (reduced) return;
 
     let frame = 0;
     const measure = () => {
@@ -82,8 +60,8 @@ export default function LandingPage() {
     };
 
     const onScroll = () => {
-      // Coalesce to one measurement per frame. Reading layout on every wheel
-      // event is what makes scroll-driven pages stutter.
+      // One measurement per frame. Reading layout on every wheel event is what
+      // makes scroll-driven pages stutter.
       if (frame === 0) frame = requestAnimationFrame(measure);
     };
 
@@ -95,215 +73,144 @@ export default function LandingPage() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, []);
+  }, [reduced]);
 
   const p = reduced ? 1 : progress;
 
-  const heroOut = chapter(p, 0, 0.16);
-  const rowsIn = chapter(p, 0.14, 0.34);
-  const barsIn = chapter(p, 0.38, 0.6);
-  const coinsIn = chapter(p, 0.64, 0.86);
+  const c1 = 1 - chapter(p, 0.1, 0.24);
+  const c2 = Math.min(chapter(p, 0.24, 0.34), 1 - chapter(p, 0.46, 0.56));
+  const c3 = Math.min(chapter(p, 0.54, 0.64), 1 - chapter(p, 0.76, 0.86));
+  const c4 = chapter(p, 0.84, 0.93);
 
-  const txCount = Math.round(easeOut(rowsIn) * TOTAL_TX);
-  const coinCount = Math.round(easeOut(coinsIn) * TOTAL_COINS);
+  const txCount = Math.round(easeOut(chapter(p, 0.24, 0.44)) * TOTAL_TX);
+  const coinCount = Math.round(easeOut(chapter(p, 0.84, 0.98)) * TOTAL_COINS);
 
-  const chapterClass = reduced
-    ? "relative"
-    : "absolute inset-0 flex flex-col justify-center";
+  /** Pinned chapters stack; reduced-motion chapters flow down the page. */
+  const layer = (visible: number, align: string) =>
+    reduced
+      ? { className: `relative ${align}`, style: undefined }
+      : {
+          className: `absolute inset-0 flex flex-col justify-center ${align}`,
+          style: {
+            opacity: visible,
+            transform: `translateY(${(1 - visible) * 26}px)`,
+            pointerEvents: (visible < 0.5 ? "none" : undefined) as "none" | undefined,
+          },
+        };
 
   return (
     <div className="relative min-h-dvh bg-bg">
       <Grain />
       {!reduced && <ScrollRail progress={p} />}
 
-      {/* Nav: plain text with the mark. No pills, no active underline. */}
       <header className="fixed inset-x-0 top-0 z-30">
         <nav className="mx-auto flex max-w-[1200px] items-center gap-6 px-5 py-5 sm:px-8">
-          <span className="mr-auto inline-flex items-center gap-2.5 text-text">
+          <span className="mr-auto inline-flex items-center gap-2.5 text-white">
             <Logo size={20} />
             <span className="text-[13px] font-medium uppercase tracking-[0.16em]">Coinfold</span>
           </span>
           <Link
             href="/login"
-            className="text-[12px] uppercase tracking-[0.14em] text-text-dim transition-colors duration-[var(--t-interaction)] hover:text-text"
+            className="text-[12px] uppercase tracking-[0.14em] text-white/65 transition-colors hover:text-white"
           >
             Sign in
           </Link>
           <Link
-            href="/app"
-            className="text-[12px] uppercase tracking-[0.14em] text-text-dim transition-colors duration-[var(--t-interaction)] hover:text-text"
+            href="/signup"
+            className="inline-flex h-9 min-h-9 items-center rounded-[var(--r-pill)] bg-white px-4 text-[12px] font-medium uppercase tracking-[0.12em] text-[#08090a] transition-transform hover:scale-[1.03]"
           >
-            Dashboard
+            Get started
           </Link>
         </nav>
       </header>
 
       {/* ---- The pinned stage ------------------------------------------- */}
-      <div ref={stageRef} style={{ height: reduced ? "auto" : "500vh" }}>
+      <div ref={stageRef} style={{ height: reduced ? "auto" : "560vh" }}>
         <div
           className={
             reduced
-              // overflow-x-clip: the chapter scrims use negative insets, and
-              // without the pinned stage's overflow-hidden to contain them they
-              // extend past the viewport and scroll the page sideways.
-              ? "relative space-y-28 overflow-x-clip px-5 py-28 sm:px-8"
+              ? "relative space-y-32 overflow-x-clip px-5 py-32 sm:px-8"
               : "sticky top-0 h-dvh overflow-hidden px-5 sm:px-8"
           }
         >
-          {/* Photography carries the atmosphere. */}
-          <PhotoBackdrop chapters={BACKDROPS} progress={p} reduced={reduced} />
-          <Wash />
-          {/* The dataset, laid over the photograph as texture: it still
-              performs the sort-into-categories moment, but it no longer has
-              to carry the whole composition on its own. */}
-          <div className="absolute inset-0 opacity-70 mix-blend-screen">
-            <ParticleField progress={p} reduced={reduced} />
-          </div>
+          <StoryBackdrop chapters={CHAPTERS} progress={p} reduced={reduced} />
 
           <div className="relative mx-auto h-full w-full max-w-[1200px]">
             {/* Chapter 1 — the claim */}
-            <section
-              className={chapterClass}
-              style={
-                reduced
-                  ? undefined
-                  : {
-                      opacity: 1 - heroOut,
-                      transform: `translateY(${heroOut * -40}px)`,
-                      pointerEvents: heroOut > 0.9 ? "none" : undefined,
-                    }
-              }
-            >
-              <p className="text-[12px] uppercase tracking-[0.22em] text-text-faint">
+            <section {...layer(c1, "")}>
+              <p className="text-[12px] uppercase tracking-[0.24em] text-white/55">
                 Credit-card bills, without the amnesia
               </p>
-              <h1 className="mt-5 text-[clamp(2.6rem,10vw,7rem)] font-semibold uppercase leading-[0.92] tracking-[-0.04em] text-text">
-                Pay the bill.
-                <br />
-                Keep the change.
+              <h1 className="mt-5 max-w-[15ch] text-[clamp(2.7rem,8.5vw,6.4rem)] font-semibold uppercase leading-[0.93] tracking-[-0.04em] text-white">
+                Pay the bill. Keep the change.
               </h1>
-              <p className="mt-7 max-w-[46ch] text-[15px] leading-relaxed text-text-dim">
+              <p className="mt-7 max-w-[44ch] text-[15px] leading-relaxed text-white/70">
                 Every ₹100 you pay earns a coin. Every rupee you spend is sorted, searchable and
-                charted. Each speck behind this text is one of{" "}
-                {TOTAL_TX.toLocaleString("en-IN")} real transactions — keep scrolling and they
-                sort themselves.
+                charted — across {TOTAL_TX.toLocaleString("en-IN")} real transactions.
               </p>
+              <div className="mt-9 flex flex-wrap items-center gap-4">
+                <Link
+                  href="/signup"
+                  className="inline-flex h-12 min-h-12 items-center gap-2 rounded-[var(--r-control)] bg-accent px-6 text-[15px] font-medium text-on-accent transition-[filter] hover:brightness-110"
+                >
+                  Create an account
+                  <ArrowRight size={16} aria-hidden />
+                </Link>
+                <Link
+                  href="/login"
+                  className="text-[13px] text-white/70 underline-offset-4 transition-colors hover:text-white hover:underline"
+                >
+                  Use the demo account
+                </Link>
+              </div>
             </section>
 
             {/* Chapter 2 — the volume */}
-            <section
-              className={chapterClass}
-              style={
-                reduced
-                  ? undefined
-                  : {
-                      opacity: rowsIn > 0 && barsIn < 1 ? Math.min(rowsIn * 2, 1 - barsIn) : 0,
-                      pointerEvents: "none",
-                    }
-              }
-            >
-              <p className="text-[12px] uppercase tracking-[0.22em] text-text-faint">
-                Every row, on the server
+            <section {...layer(c2, "")}>
+              <p className="text-[12px] uppercase tracking-[0.24em] text-white/55">
+                Every row, sorted on the server
               </p>
-              <p className="tnum mt-4 text-[clamp(3rem,13vw,9rem)] font-semibold leading-[0.9] tracking-[-0.04em] text-text">
+              <p className="tnum mt-4 text-[clamp(3.2rem,12vw,8.5rem)] font-semibold leading-[0.9] tracking-[-0.04em] text-white">
                 {txCount.toLocaleString("en-IN")}
               </p>
-              <p className="mt-4 max-w-[46ch] text-[15px] leading-relaxed text-text-dim">
-                transactions across {MONTHS} months, filtered and sorted in Postgres — never
-                shipped to your browser in one lump.
+              <p className="mt-5 max-w-[42ch] text-[15px] leading-relaxed text-white/70">
+                transactions across {MONTHS} months. Filtered, sorted and paginated in Postgres —
+                never shipped to your browser in one lump.
               </p>
             </section>
 
-            {/* Chapter 3 — the sort. The canvas does the drawing; the copy
-                only names what the reader is already watching happen. */}
-            <section
-              className={chapterClass}
-              style={
-                reduced
-                  ? undefined
-                  : {
-                      opacity: barsIn > 0 && coinsIn < 1 ? Math.min(barsIn * 2, 1 - coinsIn) : 0,
-                      pointerEvents: "none",
-                    }
-              }
-            >
-              <div className="relative ml-auto max-w-[30ch] text-right">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -inset-x-10 -inset-y-8"
-                  style={{
-                    background:
-                      "radial-gradient(ellipse 70% 60% at 70% 50%, var(--bg) 45%, transparent 100%)",
-                  }}
-                />
-                <div className="relative">
-                <p className="text-[12px] uppercase tracking-[0.22em] text-text-faint">
+            {/* Chapter 3 — the sort. Copy on the right. */}
+            <section {...layer(c3, "items-end text-right")}>
+              <div className="max-w-[34ch]">
+                <p className="text-[12px] uppercase tracking-[0.24em] text-white/55">
                   Where the money actually went
                 </p>
-                <h2 className="mt-4 text-[clamp(1.8rem,5vw,3.2rem)] font-semibold uppercase leading-[0.98] tracking-[-0.03em] text-text">
-                  Ten categories,
-                  <br />
-                  sorting themselves
+                <h2 className="mt-4 text-[clamp(2rem,5.5vw,3.6rem)] font-semibold uppercase leading-[0.97] tracking-[-0.03em] text-white">
+                  Ten categories. One glance.
                 </h2>
-                <ul className="mt-6 flex flex-wrap justify-end gap-x-4 gap-y-1.5">
-                  {LEGEND.map((item) => (
-                    <li
-                      key={item.label}
-                      className="inline-flex items-center gap-1.5 text-[11px] text-text-dim"
-                    >
-                      <span
-                        aria-hidden
-                        className="size-1.5 rounded-full"
-                        style={{ background: `oklch(72% 0.13 ${item.hue})` }}
-                      />
-                      {item.label}
-                    </li>
-                  ))}
-                </ul>
-                </div>
+                <p className="mt-5 text-[15px] leading-relaxed text-white/70">
+                  Click a slice and the table below it filters. Filter the table and the charts
+                  reshape. They read the same query, so they can never disagree.
+                </p>
               </div>
             </section>
 
-            {/* Chapter 4 — the payoff. THE one framed element in the design. */}
-            <section
-              className={
-                reduced ? "relative" : "absolute inset-0 flex flex-col items-center justify-center"
-              }
-              style={reduced ? undefined : { opacity: coinsIn, pointerEvents: "none" }}
-            >
-              <div className="relative text-center">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -inset-x-16 -inset-y-10"
-                  style={{
-                    background:
-                      "radial-gradient(ellipse 60% 55% at 50% 62%, var(--bg) 40%, transparent 100%)",
-                  }}
-                />
-                <p className="relative text-[12px] uppercase tracking-[0.22em] text-text-faint">
-                  And the change you kept
-                </p>
-
-                <div
-                  className="relative mx-auto mt-6 inline-flex items-center gap-4 rounded-[var(--r-card)] border border-border-strong bg-surface-1/80 px-7 py-5 shadow-[var(--shadow-2),var(--highlight)] backdrop-blur-md"
-                  style={{ transform: `scale(${0.96 + easeOut(coinsIn) * 0.04})` }}
-                >
-                  <Coins size={26} aria-hidden style={{ color: "var(--accent)" }} />
-                  <div className="text-left">
-                    <p className="text-[11px] uppercase tracking-[0.16em] text-text-faint">
-                      Coins earned
-                    </p>
-                    <p className="tnum mt-1 text-[clamp(2rem,7vw,3.4rem)] font-semibold leading-none tracking-[-0.03em] text-text">
-                      {coinCount.toLocaleString("en-IN")}
-                    </p>
-                  </div>
-                </div>
-
-                <p className="relative mx-auto mt-6 max-w-[42ch] text-[15px] leading-relaxed text-text-dim">
-                  Redeemable against vouchers and statement cashback. The balance is a ledger, not
-                  a counter — every coin traces back to the payment that earned it.
-                </p>
-              </div>
+            {/* Chapter 4 — the payoff. Centred. */}
+            <section {...layer(c4, "items-center text-center")}>
+              <p className="text-[12px] uppercase tracking-[0.24em] text-white/55">
+                And the change you kept
+              </p>
+              <p className="tnum mt-4 text-[clamp(3rem,11vw,7.5rem)] font-semibold leading-[0.9] tracking-[-0.04em] text-white">
+                {coinCount.toLocaleString("en-IN")}
+              </p>
+              <p className="mt-2 inline-flex items-center gap-2 text-[13px] uppercase tracking-[0.18em] text-accent">
+                <Coins size={15} aria-hidden />
+                coins earned
+              </p>
+              <p className="mx-auto mt-6 max-w-[42ch] text-[15px] leading-relaxed text-white/70">
+                Redeemable against vouchers and statement cashback. The balance is a ledger, not a
+                counter — every coin traces back to the payment that earned it.
+              </p>
             </section>
           </div>
         </div>
@@ -350,20 +257,19 @@ export default function LandingPage() {
             ))}
           </ul>
 
-          {/* One CTA. The only saturated element on the page. */}
           <div className="mt-16 flex flex-wrap items-center gap-4">
             <Link
-              href="/app"
-              className="inline-flex h-12 min-h-12 items-center gap-2 rounded-[var(--r-control)] bg-accent px-6 text-[15px] font-medium text-on-accent transition-[filter] duration-[var(--t-interaction)] hover:brightness-110"
+              href="/signup"
+              className="inline-flex h-12 min-h-12 items-center gap-2 rounded-[var(--r-control)] bg-accent px-6 text-[15px] font-medium text-on-accent transition-[filter] hover:brightness-110"
             >
-              Open the dashboard
+              Create an account
               <ArrowRight size={16} aria-hidden />
             </Link>
             <Link
               href="/login"
               className="text-[13px] text-text-dim underline-offset-4 transition-colors hover:text-text hover:underline"
             >
-              Use the demo account
+              Sign in with the demo account
             </Link>
           </div>
         </div>
@@ -372,7 +278,7 @@ export default function LandingPage() {
       <footer className="relative border-t border-border px-5 py-8 sm:px-8">
         <p className="mx-auto max-w-[1200px] text-[12px] text-text-faint">
           Coinfold — built as a take-home exercise. Every figure comes from the supplied
-          10,000-row sample dataset.
+          10,000-row sample dataset. Photography under the Pexels Licence.
         </p>
       </footer>
     </div>

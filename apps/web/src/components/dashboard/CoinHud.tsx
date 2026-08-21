@@ -3,6 +3,7 @@
 import { Coins } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { usePrefersReducedMotion } from "@/hooks/useBrowserState";
 import { count } from "@/lib/format";
 
 /**
@@ -18,7 +19,7 @@ import { count } from "@/lib/format";
  * data, not decorating it.
  */
 
-function useCountUp(target: number, duration = 700) {
+function useCountUp(target: number, reduced: boolean, duration = 700) {
   const [display, setDisplay] = useState(target);
   const fromRef = useRef(target);
   const frameRef = useRef<number>(0);
@@ -27,13 +28,11 @@ function useCountUp(target: number, duration = 700) {
     const from = fromRef.current;
     if (from === target) return;
 
-    const reduced =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
+    // With motion disabled there is no animation to run. The hook returns
+    // `target` directly in that case, so only the ref needs syncing here —
+    // setting state would be a cascading render for a value already rendered.
     if (reduced) {
       fromRef.current = target;
-      setDisplay(target);
       return;
     }
 
@@ -55,9 +54,9 @@ function useCountUp(target: number, duration = 700) {
 
     frameRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameRef.current);
-  }, [target, duration]);
+  }, [target, duration, reduced]);
 
-  return display;
+  return reduced ? target : display;
 }
 
 export function CoinHud({
@@ -69,7 +68,8 @@ export function CoinHud({
   lifetimeEarned: number | null;
   loading: boolean;
 }) {
-  const value = useCountUp(balance ?? 0);
+  const reduced = usePrefersReducedMotion();
+  const value = useCountUp(balance ?? 0, reduced);
 
   return (
     <div className="flex items-center gap-3 rounded-[var(--r-card)] border border-border-strong bg-surface-1 px-4 py-2.5 shadow-[var(--shadow-2),var(--highlight)]">
