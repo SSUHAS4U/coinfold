@@ -277,3 +277,13 @@ def redeem(
         balance=result["balance"],
     )
     return schemas.RedemptionOut(**result)
+
+
+@rewards_router.post("/redemptions/{redemption_id}/reverse")
+def reverse_redemption(
+    redemption_id: Annotated[int, Path(ge=1)], user_id: UserIdDep, conn: ConnDep
+) -> schemas.RedemptionOut:
+    result = rewards_db.reverse(conn, user_id=user_id, redemption_id=redemption_id)
+    conn.commit()
+    log_event(logging.INFO, "redemption reversed", user_id=user_id, redemption_id=redemption_id)
+    return schemas.RedemptionOut(**result)

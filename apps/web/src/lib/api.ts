@@ -352,4 +352,9 @@ export const api = {
 
   redemptions: () =>
     request<Omit<Redemption, "balance" | "replayed">[]>("/api/rewards/redemptions"),
+
+  reverseRedemption: (redemption_id: number) =>
+    request<Redemption>(`/api/rewards/redemptions/${redemption_id}/reverse`, {
+      method: "POST",
+    }),
 };

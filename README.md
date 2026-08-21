@@ -150,7 +150,6 @@ Full reasoning: [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md).
 ## Not done
 ## Not done
 
-- **Reward reversal** is modelled in the schema and ledger but no endpoint exposes it.
 - **Walkthrough video** is optional because the frontend and backend are deployed; see the submission notes in [`docs/DEPLOY.md`](docs/DEPLOY.md) if one is still desired.
 
 ## Known issues

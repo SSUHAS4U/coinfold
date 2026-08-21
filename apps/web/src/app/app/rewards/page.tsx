@@ -1,6 +1,6 @@
 "use client";
 
-import { Coins, Gift, History } from "lucide-react";
+import { Coins, Gift, History, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useDashboardContext } from "@/components/app/DashboardContext";
@@ -28,6 +28,12 @@ export default function RewardsPage() {
   const [history, setHistory] = useState<Redemption[] | null>(null);
   const [nonce, setNonce] = useState(0);
   const historyLoading = history === null;
+
+  const reverse = async (id: number) => {
+    await api.reverseRedemption(id);
+    setNonce((n) => n + 1);
+    refresh();
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -126,7 +132,9 @@ export default function RewardsPage() {
                   <Gift size={15} aria-hidden />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13.5px] font-medium text-text">{row.title}</p>
+                  <p className="truncate text-[13.5px] font-medium text-text">
+                    {row.title} {row.status === "REVERSED" && "(reversed)"}
+                  </p>
                   <p className="mt-0.5 text-[12px] text-text-faint">
                     {longDateTime(row.created_at)} · worth {money(row.rupee_value)}
                   </p>
@@ -135,8 +143,18 @@ export default function RewardsPage() {
                   {row.voucher_code}
                 </code>
                 <span className="tnum shrink-0 text-[13px] text-text-dim">
-                  −{count(row.coin_cost)}
+                  {row.status === "REVERSED" ? "Returned" : `−${count(row.coin_cost)}`}
                 </span>
+                {row.status !== "REVERSED" && (
+                  <button
+                    type="button"
+                    onClick={() => void reverse(row.id)}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--r-control)] border border-border px-3 text-[12px] text-text-dim hover:border-border-strong hover:text-text"
+                  >
+                    <RotateCcw size={13} aria-hidden />
+                    Reverse
+                  </button>
+                )}
               </li>
             ))}
           </ul>

@@ -209,3 +209,42 @@ def redeem(
         "balance": int(new_balance),
         "replayed": False,
     }
+
+
+def reverse(
+    conn: psycopg.Connection, *, user_id: str, redemption_id: int
+) -> dict[str, Any]:
+    """Reverse one confirmed redemption and restore its finite stock atomically."""
+    locked = conn.execute(
+        "SELECT id FROM app_user WHERE id = %s FOR UPDATE", (user_id,)
+    ).fetchone()
+    if locked is None:
+        raise AppFault("AUTH_TOKEN_INVALID", reason="user no longer exists")
+
+    redemption = conn.execute(
+        "SELECT r.id, r.reward_id, r.coin_cost, r.status, r.voucher_code, "
+        "r.created_at, w.title, w.slug, w.rupee_value, w.stock "
+        "FROM redemption r JOIN reward w ON w.id = r.reward_id "
+        "WHERE r.id = %s AND r.user_id = %s FOR UPDATE",
+        (redemption_id, user_id),
+    ).fetchone()
+    if redemption is None:
+        raise AppFault("REDEMPTION_NOT_FOUND", redemption_id=redemption_id)
+    if redemption["status"] == "REVERSED":
+        raise AppFault("REDEMPTION_ALREADY_REVERSED", redemption_id=redemption_id)
+
+    conn.execute(
+        "UPDATE redemption SET status = 'REVERSED' WHERE id = %s", (redemption_id,)
+    )
+    if redemption["stock"] is not None:
+        conn.execute(
+            "UPDATE reward SET stock = stock + 1 WHERE id = %s",
+            (redemption["reward_id"],),
+        )
+    conn.execute(
+        "INSERT INTO coin_ledger (user_id, delta, reason, redemption_id) "
+        "VALUES (%s, %s, 'REDEEM_REVERSAL', %s)",
+        (user_id, redemption["coin_cost"], redemption_id),
+    )
+    balance = get_balance(conn, user_id=user_id)["balance"]
+    return {**redemption, "status": "REVERSED", "balance": int(balance), "replayed": False}

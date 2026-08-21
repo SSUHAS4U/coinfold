@@ -140,6 +140,18 @@ FAULTS: dict[str, FaultSpec] = {
         ),
         action="Reload the Rewards panel and redeem again; the app generates a fresh key per attempt.",
     ),
+    "REDEMPTION_NOT_FOUND": FaultSpec(
+        status=404,
+        what="That redemption is not in your history.",
+        why="No redemption with that id belongs to the signed-in user.",
+        action="Open Rewards and choose a redemption from your own history.",
+    ),
+    "REDEMPTION_ALREADY_REVERSED": FaultSpec(
+        status=409,
+        what="That redemption has already been reversed.",
+        why="A redemption can be reversed only once, so a repeated request cannot add coins twice.",
+        action="Refresh the Rewards history and use the current redemption status.",
+    ),
     # --- Infrastructure -----------------------------------------------------
     "DB_UNAVAILABLE": FaultSpec(
         status=503,
