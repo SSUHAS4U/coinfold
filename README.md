@@ -64,6 +64,9 @@ That single command applies every migration, loads all 10,000 rows, records
 every data repair, and mints the coin ledger — in one transaction, so a failure
 leaves the database untouched. It prints what it had to repair:
 
+On Render, the API performs the same seed automatically when it finds an empty
+database. Existing transaction data is left untouched.
+
 ```
   loaded 10,000 transactions
 
@@ -147,7 +150,6 @@ Full reasoning: [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md).
 - [x] Light and dark themes, both designed.
 - [x] Scroll-driven landing page.
 
-## Not done
 ## Not done
 
 - **Walkthrough video** is optional because the frontend and backend are deployed; see the submission notes in [`docs/DEPLOY.md`](docs/DEPLOY.md) if one is still desired.
