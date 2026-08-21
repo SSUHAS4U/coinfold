@@ -1,7 +1,8 @@
 # Deploying
 
 Frontend on **Vercel**, backend as a Docker service on **Render**, Postgres on
-**Supabase**. Everything needed is committed; what is missing is credentials.
+**Supabase**. The production deployment is live; secrets remain provider-managed
+and are never committed.
 
 ---
 

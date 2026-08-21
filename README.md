@@ -15,9 +15,9 @@ spend analytics, and reward coins you can actually spend.
 
 | | |
 |---|---|
-| **Frontend** | _pending deploy — see [`docs/DEPLOY.md`](docs/DEPLOY.md)_ |
-| **Backend** | _pending deploy_ |
-| **API docs** | `<backend>/docs` (OpenAPI, left on deliberately for reviewers) |
+| **Frontend** | https://coinfold.vercel.app |
+| **Backend** | https://coinfold-api.onrender.com |
+| **API docs** | https://coinfold-api.onrender.com/docs (OpenAPI, left on deliberately for reviewers) |
 
 **Demo account** — also pre-filled on the sign-in form, so you are in with one click:
 
@@ -148,10 +148,10 @@ Full reasoning: [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md).
 - [x] Scroll-driven landing page.
 
 ## Not done
+## Not done
 
-- **Deployment is not live yet.** Everything is deploy-ready — `render.yaml`, a Dockerfile, CI, and a keep-warm workflow — but the vendor credentials had not been provisioned at the time of writing. See [`docs/DEPLOY.md`](docs/DEPLOY.md).
-- **No walkthrough video** yet.
 - **Reward reversal** is modelled in the schema and ledger but no endpoint exposes it.
+- **Walkthrough video** is optional because the frontend and backend are deployed; see the submission notes in [`docs/DEPLOY.md`](docs/DEPLOY.md) if one is still desired.
 
 ## Known issues
 
