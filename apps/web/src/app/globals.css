@@ -22,13 +22,13 @@
 
 :root {
   /* --- Canvas ------------------------------------------------------------ */
-  --canvas: #f7f5f2;
-  --canvas-sunk: #eeeae4; /* wells: table body, inset areas */
+  --canvas: #f4f7fa;
+  --canvas-sunk: #e7edf3; /* wells: table body, inset areas */
 
   /* --- Content ----------------------------------------------------------- */
   --content: #ffffff;
-  --content-hover: #fbf9f6;
-  --content-active: #f3f0eb;
+  --content-hover: #f9fbfd;
+  --content-active: #eef3f8;
 
   /* --- Floating (the only blurred layer) --------------------------------- */
   --floating: rgb(255 255 255 / 0.72);
@@ -40,17 +40,17 @@
   --line-strong: rgb(0 0 0 / 0.13);
 
   /* --- Ink --------------------------------------------------------------- */
-  --ink: #16161d;
-  --ink-dim: #62636b;
-  --ink-faint: #9698a1;
+  --ink: #101822;
+  --ink-dim: #5a6675;
+  --ink-faint: #8d99a8;
 
   /* --- The one signature accent: electric blue → violet ------------------ */
-  --accent: #4f5bff;
-  --accent-2: #8b5cf6;
-  --accent-soft: rgb(79 91 255 / 0.1);
-  --accent-line: rgb(79 91 255 / 0.28);
+  --accent: #0891b2;
+  --accent-2: #4f46e5;
+  --accent-soft: rgb(8 145 178 / 0.1);
+  --accent-line: rgb(8 145 178 / 0.3);
   --on-accent: #ffffff;
-  --accent-gradient: linear-gradient(135deg, #4f5bff 0%, #8b5cf6 100%);
+  --accent-gradient: linear-gradient(135deg, #06b6d4 0%, #4f46e5 100%);
 
   /* --- Rewards are gold. Never the accent; they are a different meaning. -- */
   --gold: #c98a1b;
@@ -90,6 +90,26 @@
   --t-enter: 380ms;
 
   /* ---------------------------------------------------------------------
+     The photographic grade. Every image in the product is pulled onto this
+     ramp so a café, a market and a pile of coins read as one brand rather
+     than three stock photos. The ramp runs deep indigo to violet to a warm
+     highlight, so graded images share the accent's family while keeping a
+     warm note for the gold that rewards use.
+     ------------------------------------------------------------------- */
+  --grade-ramp: linear-gradient(
+    145deg,
+    #0e7490 0%,
+    #06b6d4 34%,
+    #4f46e5 70%,
+    #d1a054 100%
+  );
+  --grade-shadow: radial-gradient(
+    ellipse 100% 80% at 50% 40%,
+    rgb(10 32 52 / 0.22) 0%,
+    rgb(4 14 26 / 0.86) 100%
+  );
+
+  /* ---------------------------------------------------------------------
      Type over photography. Four layers, per the design skill: a global base
      scrim, a per-band scrim that deepens with the band's own progress, a
      three-layer text shadow, and a chip backing for small labels. A single
@@ -98,18 +118,18 @@
      ------------------------------------------------------------------- */
   --scrim-base: radial-gradient(
     ellipse 120% 90% at 50% 45%,
-    rgb(10 8 6 / 0) 35%,
-    rgb(10 8 6 / 0.62) 100%
+    rgb(4 12 22 / 0) 35%,
+    rgb(4 12 22 / 0.4) 100%
   );
   --scrim-band: radial-gradient(
     ellipse 76% 64% at 50% 50%,
-    rgb(8 6 5 / 0.68) 0%,
-    rgb(8 6 5 / 0.46) 46%,
-    rgb(8 6 5 / 0) 76%
+    rgb(4 11 20 / 0.68) 0%,
+    rgb(4 11 20 / 0.46) 46%,
+    rgb(4 11 20 / 0) 76%
   );
   --tshadow:
-    0 1px 2px rgb(8 6 5 / 0.95), 0 3px 12px rgb(8 6 5 / 0.78),
-    0 10px 44px rgb(8 6 5 / 0.8);
+    0 1px 2px rgb(4 11 20 / 0.95), 0 3px 12px rgb(4 11 20 / 0.78),
+    0 10px 44px rgb(4 11 20 / 0.8);
 
   /* Mono only where columns must align — never for a single hero figure. */
   --font-mono-stack: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
@@ -126,12 +146,12 @@
    ========================================================================== */
 
 .dark {
-  --canvas: #0e0c0a;
-  --canvas-sunk: #0a0908;
+  --canvas: #080d14;
+  --canvas-sunk: #060a10;
 
-  --content: #191614;
-  --content-hover: #1c1c24;
-  --content-active: #22222b;
+  --content: #111823;
+  --content-hover: #161f2c;
+  --content-active: #1d2836;
 
   --floating: rgb(30 30 38 / 0.72);
   --floating-strong: rgb(30 30 38 / 0.9);
@@ -144,12 +164,12 @@
   --ink-faint: #6e6f7b;
 
   /* Lifted and desaturated slightly: the light-theme blue is muddy on black. */
-  --accent: #7b85ff;
-  --accent-2: #a78bfa;
-  --accent-soft: rgb(123 133 255 / 0.16);
-  --accent-line: rgb(123 133 255 / 0.36);
-  --on-accent: #0b0b12;
-  --accent-gradient: linear-gradient(135deg, #7b85ff 0%, #a78bfa 100%);
+  --accent: #22d3ee;
+  --accent-2: #818cf8;
+  --accent-soft: rgb(34 211 238 / 0.16);
+  --accent-line: rgb(34 211 238 / 0.38);
+  --on-accent: #041016;
+  --accent-gradient: linear-gradient(135deg, #22d3ee 0%, #818cf8 100%);
 
   --gold: #e8a33d;
   --gold-bright: #f5c169;
@@ -263,11 +283,11 @@ body {
 /* Layer 4: a blurred backing pill for small labels over photography, which
    the big radial scrim would have to be far too dark to rescue. */
 .chip-scrim {
-  background: rgb(10 8 6 / 0.42);
+  background: rgb(6 16 28 / 0.42);
   border: 1px solid rgb(255 255 255 / 0.16);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  text-shadow: 0 1px 3px rgb(8 6 5 / 0.85);
+  text-shadow: 0 1px 3px rgb(4 11 20 / 0.85);
 }
 
 /* ============================================================================

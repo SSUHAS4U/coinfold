@@ -69,29 +69,29 @@
     "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
     "bytes": 213491
   },
-  "hero-1-evening": {
-    "file": "/img/hero-1-evening.jpg",
-    "source": "https://images.pexels.com/photos/13663208/pexels-photo-13663208.jpeg",
+  "hero-1-coin": {
+    "file": "/img/hero-1-coin.jpg",
+    "source": "https://images.pexels.com/photos/14856617/pexels-photo-14856617.jpeg",
     "provider": "Pexels",
     "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
-    "bytes": 1107054
+    "bytes": 567450
   },
-  "hero-2-street": {
-    "file": "/img/hero-2-street.jpg",
-    "source": "https://images.pexels.com/photos/29446768/pexels-photo-29446768.jpeg",
+  "hero-2-pair": {
+    "file": "/img/hero-2-pair.jpg",
+    "source": "https://images.pexels.com/photos/8358039/pexels-photo-8358039.jpeg",
     "provider": "Pexels",
     "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
-    "bytes": 392739
+    "bytes": 637756
   },
-  "hero-3-desk": {
-    "file": "/img/hero-3-desk.jpg",
-    "source": "https://images.pexels.com/photos/30473581/pexels-photo-30473581.jpeg",
+  "hero-3-macro": {
+    "file": "/img/hero-3-macro.jpg",
+    "source": "https://images.pexels.com/photos/8048194/pexels-photo-8048194.jpeg",
     "provider": "Pexels",
     "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",
-    "bytes": 457733
+    "bytes": 501365
   },
-  "hero-4-gold": {
-    "file": "/img/hero-4-gold.jpg",
+  "hero-4-hoard": {
+    "file": "/img/hero-4-hoard.jpg",
     "source": "https://images.pexels.com/photos/7584362/pexels-photo-7584362.jpeg",
     "provider": "Pexels",
     "licence": "Pexels Licence \u2014 free for commercial use, no attribution required",

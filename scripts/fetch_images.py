@@ -60,10 +60,15 @@ FEATURE: dict[str, str] = {
 # the picture is doing (the echo principle): a warm room to open on, a lit
 # street for volume, a quiet desk for the sort, gold for the payoff.
 HERO: dict[str, str] = {
-    "hero-1-evening": "https://images.pexels.com/photos/13663208/pexels-photo-13663208.jpeg",
-    "hero-2-street": "https://images.pexels.com/photos/29446768/pexels-photo-29446768.jpeg",
-    "hero-3-desk": "https://images.pexels.com/photos/30473581/pexels-photo-30473581.jpeg",
-    "hero-4-gold": "https://images.pexels.com/photos/7584362/pexels-photo-7584362.jpeg",
+    # Editorial macro still life of currency. Two constraints had to hold at
+    # once: the subject must be about money (a beautiful skincare bottle says
+    # nothing about a bill-payment app), and the frame must carry real negative
+    # space for the headline to sit in. Coin macro does both, and it is the
+    # product's own metaphor.
+    "hero-1-coin": "https://images.pexels.com/photos/14856617/pexels-photo-14856617.jpeg",
+    "hero-2-pair": "https://images.pexels.com/photos/8358039/pexels-photo-8358039.jpeg",
+    "hero-3-macro": "https://images.pexels.com/photos/8048194/pexels-photo-8048194.jpeg",
+    "hero-4-hoard": "https://images.pexels.com/photos/7584362/pexels-photo-7584362.jpeg",
 }
 
 

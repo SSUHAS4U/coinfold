@@ -1,11 +1,11 @@
 "use client";
 
 import { motion } from "motion/react";
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { Mark } from "@/components/brand/Mark";
+import { GradedPhoto } from "@/components/ui/GradedPhoto";
 import { easeEnter, rise, riseStagger } from "@/lib/motion";
 
 /**
@@ -43,20 +43,7 @@ export function AuthShell({
   return (
     <main className="grid min-h-dvh bg-[var(--canvas)] lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)]">
       <aside className="relative hidden overflow-hidden bg-[#2b2a6b] lg:block">
-        <Image
-          src={image}
-          alt=""
-          fill
-          priority
-          sizes="55vw"
-          quality={90}
-          className="object-cover"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 mix-blend-multiply"
-          style={{ backgroundImage: "var(--accent-gradient)", opacity: 0.82 }}
-        />
+        <GradedPhoto src={image} priority sizes="55vw" strength={0.85} />
         <div
           aria-hidden
           className="absolute inset-0"

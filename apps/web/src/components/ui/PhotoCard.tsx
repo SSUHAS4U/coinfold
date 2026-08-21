@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "motion/react";
-import Image from "next/image";
 import type { ReactNode } from "react";
+
+import { GradedPhoto } from "@/components/ui/GradedPhoto";
 
 import { springPanel, springControl } from "@/lib/motion";
 
@@ -74,12 +75,13 @@ export function PhotoCard({
           variants={{ rest: { scale: 1 }, hover: { scale: 1.07 } }}
           transition={springPanel}
         >
-          <Image
+          {/* Graded more gently than the hero: these are small, and a full
+              duotone at card size loses the subject entirely. */}
+          <GradedPhoto
             src={src}
             alt={alt}
-            fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover"
+            strength={0.55}
           />
         </motion.div>
 

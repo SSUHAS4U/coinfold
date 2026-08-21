@@ -1,10 +1,10 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import { GradedPhoto } from "@/components/ui/GradedPhoto";
 import { usePrefersReducedMotion } from "@/hooks/useBrowserState";
 
 /**
@@ -17,14 +17,18 @@ import { usePrefersReducedMotion } from "@/hooks/useBrowserState";
  *   named entrance. The entrance ECHOES what the picture is doing, so the
  *   words and the image read as a single event instead of two things layered.
  *
- *     1  a warm room at closing time   "Your money has a story."
+ *     1  a payment being made      "Your money has a story."
  *        entrance: word-by-word rise, opening already settled
- *     2  a lit street, all motion      "Ten thousand payments."
+ *     2  spending, in volume       "Ten thousand payments."
  *        entrance: characters scatter-assemble, chaos resolving to order
- *     3  a quiet desk                  "Sorted before you ask."
+ *     3  statements being sorted   "Sorted before you ask."
  *        entrance: blur-to-sharp, focus arriving
- *     4  gold                          "And you keep the change."
+ *     4  coins                     "And you keep the change."
  *        entrance: staged settle, headline then subline then CTA
+ *
+ * Every photograph is GRADED onto the brand ramp (see GradedPhoto), so a
+ * payment terminal, a market and a pile of coins read as one place rather
+ * than as three stock photos that happen to be adjacent.
  *
  *   THE LEGIBILITY SYSTEM — four layers, because a single flat overlay kills
  *   the photograph without ever making the words safe:
@@ -49,11 +53,13 @@ interface Band {
   to: number;
   entrance: "rise" | "scatter" | "focus" | "settle";
   align: "left" | "right" | "center";
+  /** Keeps the subject out of the copy's lane. */
+  position?: string;
 }
 
 const BANDS: Band[] = [
   {
-    image: "/img/hero-1-evening.jpg",
+    image: "/img/hero-1-coin.jpg",
     eyebrow: "Credit-card bills, without the amnesia",
     headline: "Your money has a story.",
     sub: "Every payment you make says something. Coinfold is where you finally get to read it.",
@@ -61,9 +67,10 @@ const BANDS: Band[] = [
     to: 0.26,
     entrance: "rise",
     align: "left",
+    position: "78% 50%",
   },
   {
-    image: "/img/hero-2-street.jpg",
+    image: "/img/hero-2-pair.jpg",
     eyebrow: "Fourteen months of statements",
     headline: "Ten thousand payments.",
     sub: "Filtered, sorted and paged in Postgres. Your browser holds fifty rows, never the whole table.",
@@ -71,9 +78,10 @@ const BANDS: Band[] = [
     to: 0.52,
     entrance: "scatter",
     align: "left",
+    position: "74% 50%",
   },
   {
-    image: "/img/hero-3-desk.jpg",
+    image: "/img/hero-3-macro.jpg",
     eyebrow: "Ten categories, one timeline",
     headline: "Sorted before you ask.",
     sub: "Five timestamp formats, forty colliding ids, two hundred missing categories. All repaired at ingest, every repair on the record.",
@@ -81,9 +89,10 @@ const BANDS: Band[] = [
     to: 0.76,
     entrance: "focus",
     align: "right",
+    position: "26% 50%",
   },
   {
-    image: "/img/hero-4-gold.jpg",
+    image: "/img/hero-4-hoard.jpg",
     eyebrow: "One coin for every ₹100",
     headline: "And you keep the change.",
     sub: "3,62,629 coins earned so far, every one of them traceable to the payment that made it.",
@@ -91,6 +100,7 @@ const BANDS: Band[] = [
     to: 1,
     entrance: "settle",
     align: "center",
+    position: "50% 45%",
   },
 ];
 
@@ -196,14 +206,12 @@ export function CinematicHero() {
                 className="absolute inset-0"
                 style={{ transform: reduced ? undefined : `scale(${1.1 - k * 0.1})` }}
               >
-                <Image
+                <GradedPhoto
                   src={band.image}
-                  alt=""
-                  fill
                   priority={index === 0}
                   sizes="100vw"
-                  quality={88}
-                  className="object-cover"
+                  strength={0.7}
+                  objectPosition={band.position}
                 />
               </div>
 
@@ -216,7 +224,7 @@ export function CinematicHero() {
                 className="absolute inset-[-4%]"
                 style={{
                   background: "var(--scrim-band)",
-                  opacity: 0.3 + 0.7 * k,
+                  opacity: 0.1 + 0.3 * k,
                 }}
               />
 
@@ -227,10 +235,10 @@ export function CinematicHero() {
                 style={{
                   background:
                     band.align === "right"
-                      ? "linear-gradient(270deg, rgb(8 6 5 / 0.72) 0%, rgb(8 6 5 / 0.28) 46%, transparent 78%)"
+                      ? "linear-gradient(270deg, rgb(4 11 20 / 0.6) 0%, rgb(4 11 20 / 0.16) 50%, transparent 80%)"
                       : band.align === "center"
-                        ? "radial-gradient(ellipse 70% 62% at 50% 52%, rgb(8 6 5 / 0.72) 0%, transparent 74%)"
-                        : "linear-gradient(90deg, rgb(8 6 5 / 0.74) 0%, rgb(8 6 5 / 0.3) 46%, transparent 78%)",
+                        ? "radial-gradient(ellipse 74% 64% at 50% 52%, rgb(4 11 20 / 0.58) 0%, transparent 78%)"
+                        : "linear-gradient(90deg, rgb(4 11 20 / 0.62) 0%, rgb(4 11 20 / 0.18) 50%, transparent 80%)",
                 }}
               />
 
