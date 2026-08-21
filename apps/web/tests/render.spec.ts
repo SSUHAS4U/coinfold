@@ -202,18 +202,23 @@ test.describe("app shell", () => {
       "page",
     );
 
-    for (const [label, path, marker] of [
-      ["Transactions", "/app/transactions", "Search merchants"],
-      ["Analytics", "/app/analytics", "Month by month"],
-      ["Rewards", "/app/rewards", "Redemption history"],
-    ] as const) {
+    // Each section is identified by something only IT renders. "Search
+    // merchants" is an aria-label rather than visible text, so it is matched by
+    // role — getByText would never find it.
+    const sections: [string, string, (p: Page) => ReturnType<Page["locator"]>][] = [
+      ["Transactions", "/app/transactions", (p) => p.getByLabel("Search merchants")],
+      ["Analytics", "/app/analytics", (p) => p.getByText("Month by month").first()],
+      ["Rewards", "/app/rewards", (p) => p.getByText("Redemption history").first()],
+    ];
+
+    for (const [label, path, marker] of sections) {
       await nav.getByRole("link", { name: label }).click();
       await page.waitForURL(`**${path}`);
       await expect(nav.getByRole("link", { name: label })).toHaveAttribute(
         "aria-current",
         "page",
       );
-      await expect(page.getByText(marker).first()).toBeVisible();
+      await expect(marker(page)).toBeVisible();
       await expectNoHorizontalScroll(page);
       await page.screenshot({ path: `test-results/section-${label.toLowerCase()}.png` });
     }

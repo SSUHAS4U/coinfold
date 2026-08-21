@@ -163,6 +163,15 @@ easing  cubic-bezier(.2, 0, 0, 1)   ← one curve, everywhere
 | Charts | Recharts | Explicitly permitted. Colours come from `accent_hue`. |
 | Icons | Lucide | SVG only. Zero emoji. |
 | Counters | Hand-built | `requestAnimationFrame`, reduced-motion aware. |
+| `AppShell` | Hand-built | Persistent sidebar from `lg`, drawer below it. |
+| Scroll story | Hand-built | Photographs scaled, drifted and cross-faded by one scroll-progress value. |
+
+### Photography
+
+Sourced from Pexels at 2400px (`scripts/fetch_images.py`, which writes a
+provenance manifest). Scrims are **directional and light** — roughly half a
+typical hero's — so the images read as photographs rather than a grey wash.
+Every image is reviewed for third-party branding before it ships.
 
 ## Verification gates
 

@@ -48,18 +48,25 @@ rows. Filtering, sorting, pagination and aggregation all happen in SQL.
 
 | Path | Owns |
 |---|---|
-| `app/page.tsx` | The scroll-driven landing story. |
-| `app/app/page.tsx` | The dashboard. Composes everything; holds no business logic. |
-| `app/login/page.tsx` | Sign in / register. |
+| `app/page.tsx` | The scroll-driven landing story: four photographic chapters. |
+| `app/login/page.tsx`, `app/signup/page.tsx` | The two auth routes. |
+| `app/app/layout.tsx` | **The authenticated area**: the session guard, the shared dashboard state, and the shell. Everything below it inherits all three. |
+| `app/app/page.tsx` | Overview — the conclusion, not the evidence. |
+| `app/app/transactions/page.tsx` | The table and its filters, given the whole viewport. |
+| `app/app/analytics/page.tsx` | Both charts, plus the filter bar. |
+| `app/app/rewards/page.tsx` | Catalogue, balance, and redemption history. |
 | `app/globals.css` | **All design tokens.** The only file allowed to contain a raw colour. |
-| `hooks/useDashboard.ts` | **The single source of query state.** One reducer, one debounce, one abort controller. |
+| `components/app/AppShell.tsx` | Sidebar, top bar, mobile drawer. |
+| `components/app/DashboardContext.tsx` | Lifts `useDashboard` to the layout so filters survive navigation. |
+| `hooks/useDashboard.ts` | **The single source of query state.** One reducer, one debounce, one abort controller. Loading is derived from a request key, never stored. |
+| `hooks/useBrowserState.ts` | Media query, theme and session reads via `useSyncExternalStore`. |
 | `lib/api.ts` | Typed client, token refresh, `ApiError` carrying the server's fault. |
 | `lib/format.ts` | All money/date formatting. Indian digit grouping, IST rendering. |
 | `components/table/TransactionTable.tsx` | The hand-built table. No component library. |
 | `components/ui/Overlay.tsx` | The hand-built modal/drawer primitive: focus trap, Escape, restore. |
 | `components/charts/SpendCharts.tsx` | Both charts. Click-to-filter. |
 | `components/rewards/RewardsPanel.tsx` | Redeem flow, optimistic update, rollback. |
-| `components/landing/*` | Photographic backdrops, particle canvas, atmosphere, logo. |
+| `components/landing/StoryBackdrop.tsx` | The scroll-driven photography, and the auth Ken Burns drift. |
 
 ---
 
@@ -89,6 +96,14 @@ Break one of these and something is quietly wrong rather than loudly broken.
     the token set is wrong.
 11. **The page never scrolls horizontally.** Wide content scrolls in its own
     container. Asserted by test at 360px.
+12. **Loading is derived, never stored.** Each result carries the request key it
+    was fetched for; loading is "the key I hold is not the key I want". Storing
+    a flag means setting it synchronously in an effect, which cascades renders.
+13. **Browser state is read with `useSyncExternalStore`**, not with an effect
+    that calls setState on mount.
+14. **Anything placed on a photographic surface pins its own ink.** Those
+    surfaces are dark in BOTH themes; following `--text` renders near-black on a
+    dark photograph in light mode.
 
 ## Fault capture
 
@@ -160,7 +175,16 @@ container that was no longer clipping them.
 **Prevention:** the render suite asserts `scrollWidth <= clientWidth` at six
 widths in both themes. It has caught this twice.
 
-### 6. Reading an animated figure mid-flight
+### 6. Third-party branding in stock photography
+
+**Symptom:** another company's logo in your hero.
+**Cause:** stock photographs of "credit cards" very often show real cards. Two
+candidates got as far as being downloaded before review caught a VISA Infinite
+card with an XP Investimentos logo, and a GENTCREATE wallet.
+**Prevention:** look at every image before shipping it. `scripts/fetch_images.py`
+records each source URL so a questionable asset can be traced and replaced.
+
+### 7. Reading an animated figure mid-flight
 
 **Symptom:** a test asserts on a number that is still counting up.
 **Cause:** the coin HUD animates to its value over ~700ms.
